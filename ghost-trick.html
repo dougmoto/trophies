@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Ghost Trick — Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>Case File — Trophy Tracker</div>
+  <h1 id="gameTitle"></h1>
+  <p class="sub" id="gameSub"></p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Progress</span>
+      <span class="panel-count">
+        <span id="doneCount">0</span> / <span id="totalCount">0</span>
+        <em id="pctLabel">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="barFill" style="width:0%"></div></div>
+    <div class="status-line" id="statusLine">Saved to this device automatically.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="backup">
+    <h3>Backup / transfer to another device</h3>
+    <textarea id="codeBox" rows="2" readonly placeholder="Your progress code appears here"></textarea>
+    <div class="backup-actions">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Paste &amp; restore</button>
+    </div>
+    <div class="backup-msg" id="backupMsg"></div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+Tracker.init({
+  key: "ghost-trick",
+  title: "Ghost Trick: Phantom Detective",
+  subtitle: "30 trophies · PS4 · 1 Platinum, 6 Gold, 9 Silver, 14 Bronze",
+
+  // Trophies already earned when this list was first set up.
+  // Only used the very first time — after that your saved progress wins.
+  earned: ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6"],
+  counters: { ghosts: 444 },   // A Curious Soul already earned
+
+  sections: [
+    {
+      title: "Story — Chapter Clears",
+      desc: "Automatic as you play through, in order. Not missable.",
+      items: [
+        { id: "ch1",  name: "7:02PM - 7:31PM",   desc: "Cleared Chapter 1" },
+        { id: "ch2",  name: "7:31PM - 8:04PM",   desc: "Cleared Chapter 2" },
+        { id: "ch3",  name: "8:04PM - 8:23PM",   desc: "Cleared Chapter 3" },
+        { id: "ch4",  name: "8:23PM - 8:34PM",   desc: "Cleared Chapter 4" },
+        { id: "ch5",  name: "8:34PM - 9:03PM",   desc: "Cleared Chapter 5" },
+        { id: "ch6",  name: "9:03PM - 10:05PM",  desc: "Cleared Chapter 6" },
+        { id: "ch7",  name: "10:05PM - 10:55PM", desc: "Cleared Chapter 7" },
+        { id: "ch8",  name: "10:55PM - 11:09PM", desc: "Cleared Chapter 8" },
+        { id: "ch9",  name: "11:13PM - 11:41PM", desc: "Cleared Chapter 9" },
+        { id: "ch10", name: "11:41PM - 12:10AM", desc: "Cleared Chapter 10" },
+        { id: "ch11", name: "12:10AM - 12:25AM", desc: "Cleared Chapter 11" },
+        { id: "ch12", name: "12:25AM - 12:51AM", desc: "Cleared Chapter 12" },
+        { id: "ch13", name: "12:51AM - 1:28AM",  desc: "Cleared Chapter 13" },
+        { id: "ch14", name: "1:28AM - 2:55AM",   desc: "Cleared Chapter 14" },
+        { id: "ch15", name: "2:55AM - 3:39AM",   desc: "Cleared Chapter 15" },
+        { id: "ch16", name: "4:19AM - 5:10AM",   desc: "Cleared Chapter 16" },
+        { id: "ch17", name: "5:10AM - 5:42AM",   desc: "Cleared Chapter 17" },
+        { id: "fate", name: "Fate Averted!",     desc: 'Cleared "Ghost Trick"' }
+      ]
+    },
+    {
+      title: "Chapter-Specific Objectives",
+      desc: "Tied to a specific chapter's ending. Replayable anytime via Chapter Select after your first clear, so none can be permanently missed — but a few need you to do the opposite of what the story wants.",
+      items: [
+        { id: "mystery", chapter: 5, caution: true,
+          name: "Mystery of the Secret Room",
+          desc: "Avert fate without any deaths after the final Fate Change",
+          note: "No-death run of the chapter's ending. Rarest trophy in the game — take it slow." },
+        { id: "crimson", chapter: 9, caution: true,
+          name: "Careful of the Crimson Light",
+          desc: "Lead the way outside without failing",
+          note: "Don't get caught by the searchlight." },
+        { id: "medicine", chapter: 10, caution: true,
+          name: "Too Much Medicine",
+          desc: "Avert fate without any deaths after the final Fate Change",
+          note: "No-death run of the chapter's ending." },
+        { id: "roof", chapter: 13, caution: true,
+          name: "Captive on the Roof",
+          desc: "Take aim and nail it on the second try",
+          note: "Deliberately miss the first attempt, land it on the second." },
+        { id: "extraordinary", chapter: 14, caution: true,
+          name: "Extraordinary Failure",
+          desc: "Fail by keeping the ball away from Mino",
+          note: "You must FAIL this puzzle on purpose. Lowest completion % in the game." },
+        { id: "redlight", chapter: 15, caution: true,
+          name: "Red Light! Green Light!",
+          desc: "Avert fate without any deaths after the final Fate Change",
+          note: "No-death run of the chapter's ending." },
+        { id: "firstlife", chapter: 18, caution: true,
+          name: "First Appearance of Life",
+          desc: "Final Chapter: Fail by removing a large symbol",
+          note: "You must FAIL on purpose by removing a large symbol." }
+      ]
+    },
+    {
+      title: "Cumulative & Bonus",
+      desc: "Counters you can update as you go — tap +/\u2212 or type the number straight in.",
+      items: [
+        { id: "ghosts", type: "counter", target: 444, step: 10,
+          name: "A Curious Soul", desc: "444 Ghosts",
+          note: "Cumulative across the whole game — examine ghosts/objects often." },
+        { id: "tricks", type: "counter", target: 444, step: 10,
+          name: "Jumping Poltergeist", desc: "444 Tricks",
+          note: "Cumulative trick-object uses across the whole game." },
+        { id: "swaps", type: "counter", target: 44, step: 1,
+          name: "Same, Same!", desc: "Swapped 44 things",
+          note: "Cumulative object swaps." },
+        { id: "puzzles", name: "Shifting Shape to Get By",
+          desc: "Complete all 5x5 Ghost Puzzles",
+          note: "Bonus puzzle mode, unlocked via the extras menu." }
+      ]
+    },
+    {
+      title: "Platinum",
+      desc: "Do this last, once every Challenge is cleared.",
+      items: [
+        { id: "plat", platinum: true, name: "Ghost Trick Master",
+          desc: "Clear all Challenges",
+          note: "Unlocks after completing every Challenge in the post-game Challenges menu." }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow"><span class="dot"></span>Case Files</div>
+  <h1>Trophy Tracker</h1>
+  <p class="sub">Manual progress logs for platinum runs.</p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Across all games</span>
+      <span class="panel-count">
+        <span id="allDone">0</span> / <span id="allTotal">0</span>
+        <em id="allPct">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="allFill" style="width:0%"></div></div>
+  </div>
+
+  <p class="section-label">Games</p>
+  <div class="games" id="games"></div>
+
+  <footer>
+    Progress is stored in this browser on this device. Each game page has a
+    backup code you can copy if you switch devices or clear browser data.
+  </footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------------------
+   ADDING A GAME
+   1. Upload its .html file (built from the same template).
+   2. Add an entry below. `key` must match the `key` in that page's
+      Tracker.init({...}) call — that's how progress is read.
+
+   ICONS — pick one style per game:
+     icon: "GT"                     two letters (default)
+     emoji: "\u{1F47B}"             any emoji
+     image: "covers/ghost-trick.jpg"  box art (see below)
+
+   BOX ART
+     Make a folder called `covers` in the repo and upload images into it.
+     Square images look best (PS Store icons are already square); anything
+     else gets centre-cropped to fit. ~200x200px is plenty — big files just
+     slow the page down. If an image is missing or the filename is wrong,
+     the tile quietly falls back to the letters.
+--------------------------------------------------------------------- */
+const GAMES = [
+  {
+    title: "Ghost Trick: Phantom Detective",
+    platform: "PS4",
+    file: "ghost-trick.html",
+    key: "ghost-trick",
+    icon: "GT",
+    image: "covers/ghost-trick.jpg",   // falls back to "GT" until you upload this
+    color: "#ff6b4a"
+  }
+
+  // ,{
+  //   title: "Stardew Valley",
+  //   platform: "PS4",
+  //   file: "stardew.html",
+  //   key: "stardew",
+  //   emoji: "\u{1F33E}",
+  //   color: "#7cc48f"
+  // }
+];
+
+function readSummary(key) {
+  try {
+    const raw = localStorage.getItem(key + "-summary-v2");
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (typeof s.done === "number" && typeof s.total === "number") return s;
+    }
+  } catch (e) {}
+  return { done: 0, total: 0 };
+}
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function render() {
+  const container = document.getElementById("games");
+  container.innerHTML = "";
+
+  let sumDone = 0, sumTotal = 0;
+
+  if (!GAMES.length) {
+    container.appendChild(el("div", "empty", "No games added yet."));
+    return;
+  }
+
+  GAMES.forEach((g) => {
+    const s = readSummary(g.key);
+    const pct = s.total ? Math.round((s.done / s.total) * 100) : 0;
+    const complete = s.total > 0 && s.done === s.total;
+    sumDone += s.done;
+    sumTotal += s.total;
+
+    const a = el("a", "game");
+    a.href = g.file;
+
+    const top = el("div", "game-top");
+
+    const thumb = el("div", "thumb" + (g.emoji ? " emoji" : ""));
+    const initials = g.icon || g.title.slice(0, 2).toUpperCase();
+    if (g.image) {
+      thumb.style.background = g.color;
+      const img = document.createElement("img");
+      img.src = g.image;
+      img.alt = "";
+      // if the file is missing or misnamed, fall back to initials
+      img.addEventListener("error", function () {
+        img.remove();
+        thumb.textContent = initials;
+      });
+      thumb.appendChild(img);
+    } else if (g.emoji) {
+      thumb.style.background = g.color;
+      thumb.textContent = g.emoji;
+    } else {
+      thumb.style.background = g.color;
+      thumb.textContent = initials;
+    }
+
+    const meta = el("div", "game-meta");
+    const title = el("div", "game-title", g.title);
+    if (complete) title.appendChild(el("span", "badge plat", "Platinum"));
+    meta.appendChild(title);
+    meta.appendChild(el("div", "game-sub",
+      g.platform + (s.total ? " · " + s.done + " of " + s.total + " trophies"
+                            : " · not started")));
+
+    const pctEl = el("div", "game-pct" + (complete ? " complete" : ""), pct + "%");
+
+    top.appendChild(thumb);
+    top.appendChild(meta);
+    top.appendChild(pctEl);
+
+    const track = el("div", "game-track");
+    const fill = el("div", "game-fill");
+    fill.style.width = pct + "%";
+    fill.style.background = complete
+      ? "linear-gradient(90deg,#ffd479,#fff0c2)"
+      : g.color;
+    track.appendChild(fill);
+
+    a.appendChild(top);
+    a.appendChild(track);
+    container.appendChild(a);
+  });
+
+  const allPct = sumTotal ? Math.round((sumDone / sumTotal) * 100) : 0;
+  document.getElementById("allDone").textContent = sumDone;
+  document.getElementById("allTotal").textContent = sumTotal;
+  document.getElementById("allPct").textContent = "(" + allPct + "%)";
+  document.getElementById("allFill").style.width = allPct + "%";
+}
+
+render();
+window.addEventListener("pageshow", render);
+document.addEventListener("visibilitychange", function () {
+  if (!document.hidden) render();
+});
+</script>
+</body>
+</html>
