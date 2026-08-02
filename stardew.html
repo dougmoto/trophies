@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Stardew Valley — Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>Farm File — Trophy Tracker</div>
+  <h1 id="gameTitle"></h1>
+  <p class="sub" id="gameSub"></p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Progress</span>
+      <span class="panel-count">
+        <span id="doneCount">0</span> / <span id="totalCount">0</span>
+        <em id="pctLabel">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="barFill" style="width:0%"></div></div>
+    <div class="status-line" id="statusLine">Saved to this device automatically.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="backup">
+    <h3>Backup / transfer to another device</h3>
+    <textarea id="codeBox" rows="2" readonly placeholder="Your progress code appears here"></textarea>
+    <div class="backup-actions">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Paste &amp; restore</button>
+    </div>
+    <div class="backup-msg" id="backupMsg"></div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+Tracker.init({
+  key: "stardew",
+  title: "Stardew Valley",
+  subtitle: "50 trophies · PS4 · 1 Platinum, 4 Gold, 14 Silver, 31 Bronze",
+
+  // Earned as of 1 Aug 2026 — 21 of 41 base game, 3 of 9 from the 1.6 pack.
+  earned: [
+    "greenhorn", "cowpoke", "homesteader", "millionaire",
+    "newfriend", "bestfriends", "cliques", "networking", "popular",
+    "movingup", "livinglarge",
+    "diy", "fisherman", "olmariner", "mothercatch", "treasuretrove", "gofer",
+    "monoculture", "thebottom", "locallegend", "singulartalent",
+    "blueribbon", "soup", "distantshore"
+  ],
+
+  sections: [
+    {
+      title: "Money",
+      desc: "Cumulative lifetime earnings — these stack, so the later ones arrive on their own.",
+      items: [
+        { id: "greenhorn",   name: "Greenhorn (15k)",     desc: "Earn 15,000g" },
+        { id: "cowpoke",     name: "Cowpoke (50k)",       desc: "Earn 50,000g" },
+        { id: "homesteader", name: "Homesteader (250k)",  desc: "Earn 250,000g" },
+        { id: "millionaire", name: "Millionaire (1mil)",  desc: "Earn 1,000,000g" },
+        { id: "legend", type: "counter", target: 10000000, step: 250000,
+          name: "Legend (10mil)", desc: "Earn 10,000,000g",
+          note: "The long one. Ancient fruit wine and kegs are the usual route." }
+      ]
+    },
+    {
+      title: "Friendship",
+      desc: "Villager hearts. Bouquets and gifts twice a week move these along.",
+      items: [
+        { id: "newfriend",   name: "A New Friend",  desc: "Reach a 5-heart friend level with someone." },
+        { id: "bestfriends", name: "Best Friends",  desc: "Reach a 10-heart friend level with someone." },
+        { id: "cliques",     name: "Cliques",       desc: "Reach a 5-heart friend level with 4 people." },
+        { id: "networking",  name: "Networking",    desc: "Reach a 5-heart friend level with 10 people." },
+        { id: "popular",     name: "Popular",       desc: "Reach a 5-heart friend level with 20 people." },
+        { id: "belovedfarmer", type: "counter", target: 8, step: 1,
+          name: "The Beloved Farmer", desc: "Reach a 10-heart friend level with 8 people.",
+          note: "Non-datable villagers cap at 10 hearts, so they count too." },
+        { id: "fullhouse", name: "Full House", desc: "Get married and have two kids",
+          note: "Second child needs the nursery — upgrade the house first." }
+      ]
+    },
+    {
+      title: "Home & Skills",
+      items: [
+        { id: "movingup",    name: "Moving Up",   desc: "Upgrade your house." },
+        { id: "livinglarge", name: "Living Large", desc: "Upgrade your house to the maximum size." },
+        { id: "singulartalent", name: "Singular Talent", desc: "Reach level 10 in a skill." },
+        { id: "fiveways", type: "counter", target: 5, step: 1,
+          name: "Master Of The Five Ways", desc: "Reach level 10 in every skill.",
+          note: "Farming, Mining, Foraging, Fishing, Combat." }
+      ]
+    },
+    {
+      title: "Fishing",
+      items: [
+        { id: "fisherman",  name: "Fisherman",  desc: "Catch 10 different fish." },
+        { id: "olmariner",  name: "Ol' Mariner", desc: "Catch 24 different fish." },
+        { id: "mothercatch", name: "Mother Catch", desc: "Catch 100 fish." },
+        { id: "masterangler", name: "Master Angler", desc: "Catch every fish.",
+          note: "Itemised sublist to come. Legendary fish are once-per-save unless you take Qi's quest." }
+      ]
+    },
+    {
+      title: "Cooking & Crafting",
+      items: [
+        { id: "cook", type: "counter", target: 10, step: 1,
+          name: "Cook", desc: "Cook 10 different recipes." },
+        { id: "souschef", type: "counter", target: 25, step: 1,
+          name: "Sous Chef", desc: "Cook 25 different recipes." },
+        { id: "gourmetchef", name: "Gourmet Chef", desc: "Cook every recipe.",
+          note: "Itemised sublist to come." },
+        { id: "diy",     name: "D.I.Y.",   desc: "Craft 15 different items." },
+        { id: "artisan", type: "counter", target: 30, step: 1,
+          name: "Artisan", desc: "Craft 30 different items." },
+        { id: "craftmaster", type: "group", name: "Craft Master", desc: "Craft every item.",
+          note: "Wedding Ring is excluded — it's co-op only and doesn't count. Turn on 'Show Advanced Crafting Information' in Options to see your crafted counts in-game.",
+          children: [
+            { group: "Bombs", children: [
+              { id: "cm_cherrybomb", name: "Cherry Bomb" },
+              { id: "cm_bomb", name: "Bomb" },
+              { id: "cm_megabomb", name: "Mega Bomb" }
+            ]},
+            { group: "Fences", children: [
+              { id: "cm_gate", name: "Gate" },
+              { id: "cm_woodfence", name: "Wood Fence" },
+              { id: "cm_stonefence", name: "Stone Fence" },
+              { id: "cm_ironfence", name: "Iron Fence" },
+              { id: "cm_hardwoodfence", name: "Hardwood Fence" }
+            ]},
+            { group: "Sprinklers", children: [
+              { id: "cm_sprinkler", name: "Sprinkler" },
+              { id: "cm_qualitysprinkler", name: "Quality Sprinkler" },
+              { id: "cm_iridiumsprinkler", name: "Iridium Sprinkler" }
+            ]},
+            { group: "Artisan Equipment", children: [
+              { id: "cm_mayo", name: "Mayonnaise Machine" },
+              { id: "cm_beehouse", name: "Bee House" },
+              { id: "cm_preserves", name: "Preserves Jar" },
+              { id: "cm_cheesepress", name: "Cheese Press" },
+              { id: "cm_loom", name: "Loom" },
+              { id: "cm_keg", name: "Keg" },
+              { id: "cm_oilmaker", name: "Oil Maker" },
+              { id: "cm_cask", name: "Cask", note: "Needs the cellar (final house upgrade)" },
+              { id: "cm_fishsmoker", name: "Fish Smoker", note: "Fish Shop, 10,000g" },
+              { id: "cm_dehydrator", name: "Dehydrator", note: "Pierre's, 10,000g" }
+            ]},
+            { group: "Fertilizer", children: [
+              { id: "cm_basicfert", name: "Basic Fertilizer" },
+              { id: "cm_qualityfert", name: "Quality Fertilizer" },
+              { id: "cm_deluxefert", name: "Deluxe Fertilizer", note: "Qi's Walnut Room, 20 Qi Gems" },
+              { id: "cm_speedgro", name: "Speed-Gro" },
+              { id: "cm_deluxespeedgro", name: "Deluxe Speed-Gro" },
+              { id: "cm_hyperspeedgro", name: "Hyper Speed-Gro", note: "Qi's Walnut Room, 30 Qi Gems" },
+              { id: "cm_basicsoil", name: "Basic Retaining Soil" },
+              { id: "cm_qualitysoil", name: "Quality Retaining Soil" },
+              { id: "cm_deluxesoil", name: "Deluxe Retaining Soil", note: "Island Trader, 50 Cinder Shards" },
+              { id: "cm_treefert", name: "Tree Fertilizer" }
+            ]},
+            { group: "Seeds", children: [
+              { id: "cm_springseeds", name: "Wild Seeds (Spring)" },
+              { id: "cm_summerseeds", name: "Wild Seeds (Summer)" },
+              { id: "cm_fallseeds", name: "Wild Seeds (Fall)" },
+              { id: "cm_winterseeds", name: "Wild Seeds (Winter)" },
+              { id: "cm_ancientseeds", name: "Ancient Seeds", note: "Donate an Ancient Seed to the museum" },
+              { id: "cm_grassstarter", name: "Grass Starter" },
+              { id: "cm_bluegrass", name: "Blue Grass Starter", note: "Qi's Walnut Room, 40 Qi Gems" },
+              { id: "cm_teasapling", name: "Tea Sapling", note: "Caroline 2-heart event" },
+              { id: "cm_fiberseeds", name: "Fiber Seeds", note: "Linus special order" },
+              { id: "cm_mystictree", name: "Mystic Tree Seed", note: "Foraging Mastery" }
+            ]},
+            { group: "Flooring & Paths", children: [
+              { id: "cm_woodfloor", name: "Wood Floor" },
+              { id: "cm_rusticplank", name: "Rustic Plank Floor" },
+              { id: "cm_strawfloor", name: "Straw Floor" },
+              { id: "cm_weatheredfloor", name: "Weathered Floor", note: "Dwarf, 500g" },
+              { id: "cm_crystalfloor", name: "Crystal Floor", note: "Krobus, 500g" },
+              { id: "cm_stonefloor", name: "Stone Floor" },
+              { id: "cm_stonewalkway", name: "Stone Walkway Floor" },
+              { id: "cm_brickfloor", name: "Brick Floor" },
+              { id: "cm_woodpath", name: "Wood Path" },
+              { id: "cm_gravelpath", name: "Gravel Path" },
+              { id: "cm_cobblestone", name: "Cobblestone Path" },
+              { id: "cm_steppingstone", name: "Stepping Stone Path" },
+              { id: "cm_crystalpath", name: "Crystal Path" }
+            ]},
+            { group: "Fishing", children: [
+              { id: "cm_spinner", name: "Spinner" },
+              { id: "cm_trapbobber", name: "Trap Bobber" },
+              { id: "cm_sonarbobber", name: "Sonar Bobber" },
+              { id: "cm_corkbobber", name: "Cork Bobber" },
+              { id: "cm_qualitybobber", name: "Quality Bobber", note: "Willy special order" },
+              { id: "cm_treasurehunter", name: "Treasure Hunter" },
+              { id: "cm_dressedspinner", name: "Dressed Spinner" },
+              { id: "cm_barbedhook", name: "Barbed Hook" },
+              { id: "cm_magnet", name: "Magnet" },
+              { id: "cm_bait", name: "Bait" },
+              { id: "cm_deluxebait", name: "Deluxe Bait" },
+              { id: "cm_wildbait", name: "Wild Bait", note: "Linus 4-heart event" },
+              { id: "cm_magicbait", name: "Magic Bait", note: "Qi's Walnut Room, 20 Qi Gems" },
+              { id: "cm_challengebait", name: "Challenge Bait", note: "Fishing Mastery" },
+              { id: "cm_crabpot", name: "Crab Pot" }
+            ]},
+            { group: "Rings", children: [
+              { id: "cm_sturdyring", name: "Sturdy Ring" },
+              { id: "cm_warriorring", name: "Warrior Ring" },
+              { id: "cm_ringofyoba", name: "Ring of Yoba" },
+              { id: "cm_thornsring", name: "Thorns Ring" },
+              { id: "cm_glowstonering", name: "Glowstone Ring" },
+              { id: "cm_iridiumband", name: "Iridium Band" }
+            ]},
+            { group: "Edible", children: [
+              { id: "cm_fieldsnack", name: "Field Snack" },
+              { id: "cm_bugsteak", name: "Bug Steak" },
+              { id: "cm_lifeelixir", name: "Life Elixir" },
+              { id: "cm_oilofgarlic", name: "Oil of Garlic" }
+            ]},
+            { group: "Totems & Consumables", children: [
+              { id: "cm_monstermusk", name: "Monster Musk", note: "Wizard special order" },
+              { id: "cm_fairydust", name: "Fairy Dust", note: "The Pirate's Wife quest" },
+              { id: "cm_totembeach", name: "Warp Totem: Beach" },
+              { id: "cm_totemmountains", name: "Warp Totem: Mountains" },
+              { id: "cm_totemfarm", name: "Warp Totem: Farm" },
+              { id: "cm_totemdesert", name: "Warp Totem: Desert", note: "Desert Trader, 10 Iridium Bars" },
+              { id: "cm_totemisland", name: "Warp Totem: Island", note: "Volcano dwarf shop, 10,000g" },
+              { id: "cm_raintotem", name: "Rain Totem" },
+              { id: "cm_treasuretotem", name: "Treasure Totem", note: "Foraging Mastery" }
+            ]},
+            { group: "Lighting", children: [
+              { id: "cm_torch", name: "Torch" },
+              { id: "cm_campfire", name: "Campfire" },
+              { id: "cm_woodenbrazier", name: "Wooden Brazier" },
+              { id: "cm_stonebrazier", name: "Stone Brazier" },
+              { id: "cm_goldbrazier", name: "Gold Brazier" },
+              { id: "cm_carvedbrazier", name: "Carved Brazier" },
+              { id: "cm_stumpbrazier", name: "Stump Brazier" },
+              { id: "cm_barrelbrazier", name: "Barrel Brazier" },
+              { id: "cm_skullbrazier", name: "Skull Brazier" },
+              { id: "cm_marblebrazier", name: "Marble Brazier" },
+              { id: "cm_woodlamppost", name: "Wood Lamp-post" },
+              { id: "cm_ironlamppost", name: "Iron Lamp-post" },
+              { id: "cm_jackolantern", name: "Jack-O-Lantern", note: "Spirit's Eve festival, 2,000g" }
+            ]},
+            { group: "Refining Equipment", children: [
+              { id: "cm_furnace", name: "Furnace" },
+              { id: "cm_heavyfurnace", name: "Heavy Furnace" },
+              { id: "cm_charcoalkiln", name: "Charcoal Kiln" },
+              { id: "cm_recycling", name: "Recycling Machine" },
+              { id: "cm_crystalarium", name: "Crystalarium" },
+              { id: "cm_bonemill", name: "Bone Mill" },
+              { id: "cm_geodecrusher", name: "Geode Crusher" },
+              { id: "cm_seedmaker", name: "Seed Maker" },
+              { id: "cm_wormbin", name: "Worm Bin" },
+              { id: "cm_deluxewormbin", name: "Deluxe Worm Bin" },
+              { id: "cm_baitmaker", name: "Bait Maker" },
+              { id: "cm_slimeeggpress", name: "Slime Egg-Press" },
+              { id: "cm_slimeincubator", name: "Slime Incubator" },
+              { id: "cm_ostrichincubator", name: "Ostrich Incubator", note: "Journal scrap on Ginger Island" },
+              { id: "cm_mushroomlog", name: "Mushroom Log" },
+              { id: "cm_tapper", name: "Tapper" },
+              { id: "cm_heavytapper", name: "Heavy Tapper" },
+              { id: "cm_lightningrod", name: "Lightning Rod" },
+              { id: "cm_solarpanel", name: "Solar Panel" },
+              { id: "cm_anvil", name: "Anvil", note: "Combat Mastery" },
+              { id: "cm_miniforge", name: "Mini-Forge", note: "Combat Mastery" }
+            ]},
+            { group: "Furniture & Decor", children: [
+              { id: "cm_tuboflowers", name: "Tub o' Flowers" },
+              { id: "cm_wickedstatue", name: "Wicked Statue" },
+              { id: "cm_fluteblock", name: "Flute Block" },
+              { id: "cm_drumblock", name: "Drum Block" },
+              { id: "cm_gardenpot", name: "Garden Pot", note: "Evelyn 5-heart event" },
+              { id: "cm_statueblessings", name: "Statue Of Blessings", note: "Raccoon shop" },
+              { id: "cm_statuedwarfking", name: "Statue Of The Dwarf King", note: "Mining Mastery" },
+              { id: "cm_minijukebox", name: "Mini-Jukebox" },
+              { id: "cm_miniobelisk", name: "Mini-Obelisk", note: "Wizard, 4-heart" },
+              { id: "cm_farmcomputer", name: "Farm Computer", note: "Demetrius special order" }
+            ]},
+            { group: "Storage", children: [
+              { id: "cm_chest", name: "Chest" },
+              { id: "cm_stonechest", name: "Stone Chest" },
+              { id: "cm_bigchest", name: "Big Chest" },
+              { id: "cm_bigstonechest", name: "Big Stone Chest" },
+              { id: "cm_junimochest", name: "Junimo Chest", note: "Qi's Walnut Room, 20 Qi Gems" },
+              { id: "cm_hopper", name: "Hopper", note: "Qi's Walnut Room, 50 Qi Gems" }
+            ]},
+            { group: "Signs", children: [
+              { id: "cm_woodsign", name: "Wood Sign" },
+              { id: "cm_stonesign", name: "Stone Sign" },
+              { id: "cm_darksign", name: "Dark Sign", note: "Krobus, 8-heart" },
+              { id: "cm_textsign", name: "Text Sign" }
+            ]},
+            { group: "Misc", children: [
+              { id: "cm_scarecrow", name: "Scarecrow" },
+              { id: "cm_deluxescarecrow", name: "Deluxe Scarecrow", note: "Collect all 8 Rarecrows" },
+              { id: "cm_staircase", name: "Staircase" },
+              { id: "cm_explosiveammo", name: "Explosive Ammo" },
+              { id: "cm_cookoutkit", name: "Cookout Kit" },
+              { id: "cm_tentkit", name: "Tent Kit" }
+            ]}
+          ]}
+      ]
+    },
+    {
+      title: "Farming & Shipping",
+      items: [
+        { id: "monoculture", name: "Monoculture", desc: "Ship 300 of one crop." },
+        { id: "polyculture", name: "Polyculture", desc: "Ship 15 of each crop.",
+          note: "Itemised sublist to come." },
+        { id: "fullshipment", name: "Full Shipment", desc: "Ship every item.",
+          note: "Itemised sublist to come — the biggest list in the game." }
+      ]
+    },
+    {
+      title: "Museum & Collections",
+      items: [
+        { id: "treasuretrove", name: "Treasure Trove", desc: "Donate 40 different items to the museum." },
+        { id: "completecollection", name: "A Complete Collection", desc: "Complete the museum collection.",
+          note: "Itemised sublist to come — 95 minerals and artifacts." },
+        { id: "stardrops", name: "Mystery Of The Stardrops", desc: "Find every stardrop.",
+          note: "Itemised sublist to come — seven of them, all from different sources." }
+      ]
+    },
+    {
+      title: "Mines & Combat",
+      items: [
+        { id: "thebottom", name: "The Bottom", desc: "Reach the lowest level of the mines." },
+        { id: "protector", name: "Protector Of The Valley",
+          desc: "Complete all of the Adventure Guild Monster Slayer goals.",
+          note: "Itemised sublist to come. Known to glitch — check Gil's board rather than trusting the pop-up." }
+      ]
+    },
+    {
+      title: "Town & Community",
+      items: [
+        { id: "locallegend", name: "Local Legend", desc: "Restore the Pelican Town Community Center." },
+        { id: "joja", caution: true, name: "Joja Co. Member Of The Year",
+          desc: "Become a Joja Co. member and purchase all the community development perks.",
+          note: "NEEDS A SECOND SAVE. Mutually exclusive with the Community Center, which you've already restored on this farm." },
+        { id: "gofer",  name: "Gofer",     desc: "Complete 10 'Help Wanted' requests." },
+        { id: "abighelp", type: "counter", target: 40, step: 1,
+          name: "A Big Help", desc: "Complete 40 'Help Wanted' requests.",
+          note: "Board resets daily — check it every morning." }
+      ]
+    },
+    {
+      title: "Arcade",
+      desc: "Both on the Journey Of The Prairie King cabinet in the Saloon.",
+      items: [
+        { id: "prairieking", name: "Prairie King", desc: "Beat 'Journey Of The Prairie King'." },
+        { id: "fectors", caution: true, name: "Fector's Challenge",
+          desc: "Beat 'Journey Of The Prairie King' without dying.",
+          note: "Rarest trophy in the game at 4.24%. One life, no continues, start to finish." }
+      ]
+    },
+    {
+      title: "1.6 Update Pack",
+      desc: "Separate DLC trophy list — 9 trophies.",
+      items: [
+        { id: "wellread",     name: "Well-Read",      desc: "Read every book.",
+          note: "Itemised sublist to come. The Bookseller visits town periodically." },
+        { id: "twothumbs",    name: "Two Thumbs Up",  desc: "See a movie.",
+          note: "Movie Theatre unlocks via the Missing Bundle in the abandoned JojaMart." },
+        { id: "blueribbon",   name: "Blue Ribbon",    desc: "Get 1st place in the Stardew Valley Fair competition." },
+        { id: "soup",         name: "An Unforgettable Soup", desc: "Delight the Governor." },
+        { id: "goodneighbors", name: "Good Neighbors", desc: "Help your forest neighbors grow their family.",
+          note: "The raccoon family in the big stump — a long multi-stage chain." },
+        { id: "distantshore", name: "A Distant Shore", desc: "Reach Ginger Island." },
+        { id: "dangerdeep",   name: "Danger in the Deep", desc: "Reach the bottom of the 'dangerous' mines.",
+          note: "Qi's Walnut Room quest. Seven in-game days, 100 floors, buffed enemies." },
+        { id: "infinitepower", name: "Infinite Power", desc: "Obtain the most powerful weapon.",
+          note: "Infinity Blade: Galaxy Sword + 60 Cinder Shards + 3 Galaxy Souls at the Volcano forge." },
+        { id: "perfection",   name: "Perfection",     desc: "Reach the summit.",
+          note: "Requires 100% Perfection — effectively every other collection trophy first." }
+      ]
+    },
+    {
+      title: "Platinum",
+      items: [
+        { id: "iridiumseal", platinum: true, name: "Iridium Seal",
+          desc: "This priceless treasure is the mark of a truly great farmer! Grandpa lives inside...",
+          note: "Base game list only — the 1.6 pack is separate and isn't required for the platinum." }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

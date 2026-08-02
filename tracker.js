@@ -86,12 +86,25 @@ const Tracker = (function () {
   }
 
   /* ---------- completion logic ---------- */
+  // Flattens a children array one or two levels deep. Entries may be:
+  //   { id, name }                       a tickable item
+  //   { group: "Fertilizer", children }  a collapsible sub-category
+  //   { group: "Pantry" }                a plain (non-collapsing) label
   function realChildren(item) {
-    return (item.children || []).filter((c) => c.id);
+    const out = [];
+    (item.children || []).forEach((c) => {
+      if (c.id) out.push(c);
+      else if (c.children) c.children.forEach((g) => { if (g.id) out.push(g); });
+    });
+    return out;
+  }
+
+  function doneIn(list) {
+    return list.filter((c) => c.id && state[c.id]).length;
   }
 
   function childDone(item) {
-    return realChildren(item).filter((c) => state[c.id]).length;
+    return doneIn(realChildren(item));
   }
 
   function isComplete(item) {
@@ -171,33 +184,71 @@ const Tracker = (function () {
     row.appendChild(wrap);
   }
 
+  function renderChildItem(c) {
+    const done = !!state[c.id];
+    const child = el("div", "child" + (done ? " checked" : ""));
+    const box = el("div", "child-box");
+    box.innerHTML = CHECK_SVG;
+    const textWrap = el("div", "child-text");
+    textWrap.appendChild(document.createTextNode(c.name));
+    if (c.note) textWrap.appendChild(el("span", "child-note", c.note));
+    child.appendChild(box);
+    child.appendChild(textWrap);
+    child.addEventListener("click", (e) => {
+      e.stopPropagation();
+      state[c.id] = !state[c.id];
+      save();
+      render();
+    });
+    return child;
+  }
+
   function renderChildren(item, row) {
     const wrap = el("div", "children");
-    (item.children || []).forEach((c) => {
-      if (!c.id) {                       // section label inside the sublist
-        wrap.appendChild(el("div", "child-group-label", c.group));
+
+    (item.children || []).forEach((c, idx) => {
+      // a tickable item
+      if (c.id) {
+        wrap.appendChild(renderChildItem(c));
         return;
       }
-      const done = !!state[c.id];
-      const child = el("div", "child" + (done ? " checked" : ""));
-      const box = el("div", "child-box");
-      box.innerHTML = CHECK_SVG;
-      const textWrap = el("div", "child-text");
-      textWrap.appendChild(document.createTextNode(c.name));
-      if (c.note) {
-        const n = el("span", "child-note", c.note);
-        textWrap.appendChild(n);
+
+      // a collapsible sub-category
+      if (c.children) {
+        const subKey = item.id + "::" + (c.group || idx);
+        const open = !!openGroups[subKey];
+        const kids = c.children.filter((k) => k.id);
+        const n = doneIn(kids);
+        const full = kids.length > 0 && n === kids.length;
+
+        const header = el("div",
+          "subgroup" + (open ? " open" : "") + (full ? " full" : ""));
+        const caret = el("div", "subgroup-caret");
+        caret.innerHTML = CARET_SVG;
+        header.appendChild(caret);
+        header.appendChild(el("span", "subgroup-name", c.group));
+        header.appendChild(el("span", "subgroup-count", n + " / " + kids.length));
+        header.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openGroups[subKey] = !openGroups[subKey];
+          render();
+        });
+        wrap.appendChild(header);
+
+        if (open) {
+          const inner = el("div", "subgroup-items");
+          c.children.forEach((k) => {
+            if (k.id) inner.appendChild(renderChildItem(k));
+          });
+          wrap.appendChild(inner);
+        }
+        return;
       }
-      child.appendChild(box);
-      child.appendChild(textWrap);
-      child.addEventListener("click", (e) => {
-        e.stopPropagation();
-        state[c.id] = !state[c.id];
-        save();
-        render();
-      });
-      wrap.appendChild(child);
+
+      // a plain, non-collapsing label
+      wrap.appendChild(el("div", "child-group-label", c.group));
     });
+
     row.appendChild(wrap);
   }
 

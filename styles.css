@@ -209,6 +209,36 @@ h1 {
 }
 .child-group-label:first-child { margin-top: 2px; }
 
+/* collapsible sub-category inside a sublist */
+.subgroup {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; margin-top: 4px;
+  background: #12151f; border: 1px solid var(--line);
+  border-radius: 8px; cursor: pointer; user-select: none;
+}
+.subgroup:active { background: #1a1f2c; }
+.subgroup.full { border-color: rgba(6,95,70,.5); background: rgba(6,78,59,.18); }
+.subgroup-caret {
+  flex: none; width: 14px; display: flex; align-items: center;
+  color: var(--muted);
+}
+.subgroup-caret svg { width: 10px; height: 10px; transition: transform .2s; }
+.subgroup.open .subgroup-caret svg { transform: rotate(90deg); }
+.subgroup-name {
+  flex: 1; font-size: 13px; font-weight: 600; letter-spacing: .01em;
+}
+.subgroup.full .subgroup-name { color: var(--done-text); }
+.subgroup-count {
+  flex: none; font-size: 11px; font-weight: 700;
+  color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.subgroup.full .subgroup-count { color: var(--done); }
+.subgroup-items {
+  display: flex; flex-direction: column; gap: 1px;
+  padding: 4px 0 6px 10px;
+  border-left: 2px solid var(--line); margin-left: 12px;
+}
+
 /* ---------- backup ---------- */
 .backup {
   background: var(--card-2); border: 1px dashed #303748;
