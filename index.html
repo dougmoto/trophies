@@ -60,7 +60,7 @@ const GAMES = [
     file: "ghost-trick.html",
     key: "ghost-trick",
     icon: "GT",
-    image: "covers/ghost-trick.jpg",   // falls back to "GT" until you upload this
+    image: "covers/ghost-trick.png",   // PNG
     color: "#ff6b4a"
   },
   {
@@ -69,7 +69,7 @@ const GAMES = [
     file: "stardew.html",
     key: "stardew",
     icon: "SV",
-    image: "covers/stardew.jpg",       // falls back to "SV" until you upload this
+    image: "covers/stardew.png",       // extension is auto-detected either way
     color: "#7cc48f"
   }
 ];
@@ -120,13 +120,26 @@ function render() {
     if (g.image) {
       thumb.style.background = g.color;
       const img = document.createElement("img");
-      img.src = g.image;
       img.alt = "";
-      // if the file is missing or misnamed, fall back to initials
+      // Try the listed file first; if it's missing, try the other common
+      // image extensions before giving up and showing the letters. This
+      // means .png vs .jpg never matters.
+      const base = g.image.replace(/\.(png|jpg|jpeg|webp)$/i, "");
+      const exts = ["png", "jpg", "jpeg", "webp"];
+      const listed = (g.image.match(/\.(png|jpg|jpeg|webp)$/i) || [".png"])[0]
+        .slice(1).toLowerCase();
+      const tries = [listed].concat(exts.filter((e) => e !== listed));
+      let attempt = 0;
       img.addEventListener("error", function () {
-        img.remove();
-        thumb.textContent = initials;
+        attempt++;
+        if (attempt < tries.length) {
+          img.src = base + "." + tries[attempt];
+        } else {
+          img.remove();
+          thumb.textContent = initials;
+        }
       });
+      img.src = base + "." + tries[0];
       thumb.appendChild(img);
     } else if (g.emoji) {
       thumb.style.background = g.color;
