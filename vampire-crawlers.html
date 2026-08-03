@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Vampire Crawlers — Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>Crawler Log — Trophy Tracker</div>
+  <h1 id="gameTitle"></h1>
+  <p class="sub" id="gameSub"></p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Progress</span>
+      <span class="panel-count">
+        <span id="doneCount">0</span> / <span id="totalCount">0</span>
+        <em id="pctLabel">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="barFill" style="width:0%"></div></div>
+    <div class="status-line" id="statusLine">Saved to this device automatically.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="backup">
+    <h3>Backup / transfer to another device</h3>
+    <textarea id="codeBox" rows="2" readonly placeholder="Your progress code appears here"></textarea>
+    <div class="backup-actions">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Paste &amp; restore</button>
+    </div>
+    <div class="backup-msg" id="backupMsg"></div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+Tracker.init({
+  key: "vampire-crawlers",
+  title: "Vampire Crawlers",
+  subtitle: "162 trophies · PS5",
+
+  // Earned as of 27 Jun 2026, per PSNProfiles (149 of 162 at capture time).
+  earned: [
+    "bg_antonio","bg_theinn","bg_bloodytear","bg_powerupsshop","bg_pasqualina","bg_runetracer",
+    "bg_nofuture","bg_gennaro","bg_thousandedge","bg_arca","bg_firewand","bg_hellfire",
+    "bg_manasyphon","bg_holywand","bg_sharpmind","bg_garlic","bg_souleater","bg_peachone",
+    "bg_ebonywings","bg_vandalier","bg_dommario","bg_unholyvespers","bg_lama","bg_deathspiral",
+    "bg_overthetop","bg_ramba","bg_carrello","bg_porta","bg_lightningring","bg_thunderloop",
+    "bg_makeascene","bg_mortaccio","bg_bone","bg_pugnala","bg_eightsparrow","bg_phieraderTuphello",
+    "bg_andanother","bg_cavallo","bg_cherrybomb","bg_giovanna","bg_gattiamari","bg_swollenfist",
+    "bg_krochi","bg_cross","bg_heavensword","bg_yourshield","bg_clerici","bg_laborra",
+    "bg_gallotower","bg_osole","bg_celestialdusting","bg_concetta","bg_shadowpinion","bg_wings",
+    "bg_gallo","bg_clocklancet","bg_christine","bg_pentagram","bg_chainlink","bg_poppea",
+    "bg_jestershat","bg_bracelet","bg_wildbuff",
+    "lv_inlaidlibrary","lv_furiousforest","lv_librarywestwing","lv_teenybridge","lv_dairyplant",
+    "lv_berserkwood","lv_librarysanctum","lv_milkfactory","lv_weenybridge","lv_meanybridge",
+    "lv_curdrefinery","lv_cappellamagna",
+    "ps_hollowheart","ps_crown","ps_spellbinder","ps_stonemask","ps_bracer","ps_emptytome",
+    "ps_pummarola","ps_attractorb","ps_duplicator","ps_clover","ps_candelabrador",
+    "rl_combostack","rl_gemhammer","rl_guidinglight","rl_polentir","rl_relicmuseum",
+    "rl_grimgrimoire","rl_overkill","rl_stardustanvil","rl_randomazzo","rl_bombainfernale",
+    "rl_lapidaryloupe","rl_sorceresstears","rl_ultimateultraoverkill",
+    "g1_nduja","g1_manarebate","g1_bluetrigger","g1_bombard","g1_growth","g1_calcium",
+    "g1_countdown","g1_copy","g1_decimate","g1_destroy","g1_easycombo","g1_refund","g1_mild",
+    "g2_drain","g2_duration","g2_freetoplay","g2_freeze","g2_restorehealth","g2_cointcount",
+    "g2_luck","g2_magichat","g2_magnetic","g2_manacost1","g2_manacost2","g2_midas","g2_remote",
+    "g3_purpletrigger","g3_redtrigger","g3_retain","g3_return","g3_reversecombo","g3_armorstrike",
+    "g3_recycle","g3_mug","g3_quickdraw","g3_coincard","g3_tripledamage","g3_wild","g3_yellowtrigger",
+    "g4_poe","g4_friendshipamulet","g4_parmaegis","g4_fireproof","g4_crawlercaller","g4_yinyang",
+    "g4_echo","g4_leader","g4_rainbow","g4_killcount","g4_greed"
+  ],
+
+  sections: [
+    {
+      title: "Base Game",
+      desc: "63 of 71. In roughly the order they unlock through normal play. \"Discover\" trophies are card evolutions — usually just needing the base card at max level plus its paired item.",
+      items: [
+        { id: "bg_legendary", platinum: true, name: "Legendary Crawler", desc: "They said there would be vampires.",
+          note: "The platinum-equivalent trophy for this game." },
+        { id: "bg_antonio", name: "Antonio", desc: "Rescued Antonio in the average Italian countryside." },
+        { id: "bg_theinn", name: "The Inn", desc: "Crawler Selection Unlocked." },
+        { id: "bg_bloodytear", name: "Discover Bloody Tear", desc: "Evolve Whip." },
+        { id: "bg_powerupsshop", name: "Power Ups Shop", desc: "Collect 250 coins." },
+        { id: "bg_pasqualina", name: "Pasqualina", desc: "Reach Level 20 with Imelda Belpaese in Inlaid Library." },
+        { id: "bg_runetracer", name: "Runetracer", desc: "Reach a high Level with Pasqualina Belpaese." },
+        { id: "bg_nofuture", name: "Discover NO FUTURE", desc: "Evolve Runetracer." },
+        { id: "bg_gennaro", name: "Gennaro", desc: "Defeat the Mantichana in Mad Forest." },
+        { id: "bg_thousandedge", name: "Discover Thousand Edge", desc: "Evolve Knife." },
+        { id: "bg_arca", name: "Arca", desc: "Play Fire Wand cards lots of times." },
+        { id: "bg_firewand", name: "Fire Wand", desc: "Destroy 20 light sources." },
+        { id: "bg_hellfire", name: "Discover Hellfire", desc: "Evolve Fire Wand." },
+        { id: "bg_manasyphon", name: "Mana Syphon", desc: "Gain lots and lots of Mana in a turn." },
+        { id: "bg_holywand", name: "Discover Holy Wand", desc: "Evolve Magic Wand." },
+        { id: "bg_sharpmind", name: "Sharp Mind", desc: "Play lots of purple cards." },
+        { id: "bg_garlic", name: "Garlic", desc: "Pick up 5 Floor Chickens." },
+        { id: "bg_souleater", name: "Discover Soul Eater", desc: "Evolve Garlic." },
+        { id: "bg_peachone", name: "Peachone", desc: "Reach Level 25." },
+        { id: "bg_ebonywings", name: "Ebony Wings", desc: "Play Peachone card once." },
+        { id: "bg_vandalier", name: "Discover Vandalier", desc: "Unite Peachone and Ebony Wings." },
+        { id: "bg_dommario", name: "Dommario", desc: "Collect lots and lots of coins." },
+        { id: "bg_unholyvespers", name: "Discover Unholy Vespers", desc: "Evolve King Bible." },
+        { id: "bg_lama", name: "Lama", desc: "Complete a dungeon with 10% Curse or more." },
+        { id: "bg_deathspiral", name: "Discover Death Spiral", desc: "Evolve Axe." },
+        { id: "bg_overthetop", name: "Over The Top", desc: "Play lots of Crawler cards." },
+        { id: "bg_ramba", name: "Ramba", desc: "Defeat the Milk Elemental." },
+        { id: "bg_carrello", name: "Carréllo", desc: "Destroy lots of Mine Carts." },
+        { id: "bg_porta", name: "Porta", desc: "Play lots of Lightning Ring cards." },
+        { id: "bg_lightningring", name: "Lightning Ring", desc: "Defeat many enemies." },
+        { id: "bg_thunderloop", name: "Discover Thunder Loop", desc: "Evolve Lightning Ring." },
+        { id: "bg_makeascene", name: "Make a Scene", desc: "Activate lots and lots of Crawler trigger abilities." },
+        { id: "bg_mortaccio", name: "Mortaccio", desc: "Defeat many Skeletons." },
+        { id: "bg_bone", name: "Bone", desc: "Reach a high Level with Mortaccio." },
+        { id: "bg_pugnala", name: "Pugnala", desc: "Find the Coffin in Berserk Wood." },
+        { id: "bg_eightsparrow", name: "Eight The Sparrow", desc: "Reach a high Level with Pugnala Provola." },
+        { id: "bg_phieraderTuphello", name: "Phiera Der Tuphello", desc: "Reach a very high Level with Pugnala Provola." },
+        { id: "bg_phieraggi", name: "Discover Phieraggi", desc: "Unite Eight The Sparrow and Phiera Der Tuphello." },
+        { id: "bg_andanother", name: "And Another", desc: "Play lots of Free-to-Play cards." },
+        { id: "bg_cavallo", name: "Cavallo", desc: "Defeat many Lion Heads." },
+        { id: "bg_cherrybomb", name: "Cherry Bomb", desc: "Reach Level 15 with Yatta Cavallo." },
+        { id: "bg_giovanna", name: "Giovanna", desc: "Find the Coffin in the Library Sanctum." },
+        { id: "bg_gattiamari", name: "Gatti Amari", desc: "Reach a high Level with Giovanna Grana." },
+        { id: "bg_vicioushunger", name: "Discover Vicious Hunger", desc: "Evolve Gatti Amari." },
+        { id: "bg_swollenfist", name: "Swollen Fist", desc: "Reach 40 Deck size." },
+        { id: "bg_krochi", name: "Krochi", desc: "Defeat many, many enemies." },
+        { id: "bg_cross", name: "Cross", desc: "Find and play a Rosary card." },
+        { id: "bg_heavensword", name: "Discover Heaven Sword", desc: "Evolve Cross." },
+        { id: "bg_yourshield", name: "Your Shield My Liege", desc: "Gain 2,000 Armor." },
+        { id: "bg_clerici", name: "Clerici", desc: "Recover lots and lots of HP." },
+        { id: "bg_laborra", name: "Discover La Borra", desc: "Evolve Santa Water." },
+        { id: "bg_gallotower", name: "Unlock Gallo Tower", desc: "Complete Weeny Bridge." },
+        { id: "bg_osole", name: "O'Sole", desc: "Defeat many Dragon Shrimps." },
+        { id: "bg_celestialdusting", name: "Celestial Dusting", desc: "Reach a high Level with O'Sole Meeo." },
+        { id: "bg_concetta", name: "Concetta", desc: "Find the Coffin in Gallo Tower." },
+        { id: "bg_shadowpinion", name: "Shadow Pinion", desc: "Reach Level 15 with Concetta Caciotta." },
+        { id: "bg_wings", name: "Wings", desc: "Reach Level 40." },
+        { id: "bg_valkyrieturner", name: "Discover Valkyrie Turner", desc: "Evolve Shadow Pinion." },
+        { id: "bg_gallo", name: "Gallo", desc: "Defeat Gallo." },
+        { id: "bg_clocklancet", name: "Clock Lancet", desc: "Find and play an Orologion card." },
+        { id: "bg_christine", name: "Christine", desc: "Find and play the Pentagram card." },
+        { id: "bg_pentagram", name: "Pentagram", desc: "Reach Level 35." },
+        { id: "bg_gorgeousmoon", name: "Discover Gorgeous Moon", desc: "Evolve Pentagram." },
+        { id: "bg_chainlink", name: "Chain Link", desc: "Reach 12 Combo or above." },
+        { id: "bg_poppea", name: "Poppea", desc: "Find the Coffin in Milk Factory." },
+        { id: "bg_songofmana", name: "Song of Mana", desc: "Reach a high Level with Poppea Pecorina." },
+        { id: "bg_mannajja", name: "Discover Mannajja", desc: "Evolve Song of Mana." },
+        { id: "bg_jestershat", name: "Jester's Hat", desc: "Play lots of Wild cards." },
+        { id: "bg_bracelet", name: "Bracelet", desc: "Reach a very very high Combo." },
+        { id: "bg_ovenkilt", name: "Ovenkilt", desc: "Find the Ovenkilt Relic." },
+        { id: "bg_wildbuff", name: "Wild Buff", desc: "Play lots and lots of cards picked up from light sources." }
+      ]
+    },
+    {
+      title: "DLC: Levels",
+      desc: "12 of 13. Stage unlocks — mostly \"complete the previous stage.\"",
+      items: [
+        { id: "lv_inlaidlibrary", name: "Unlock Inlaid Library", desc: "Reach Level 10 in Mad Forest." },
+        { id: "lv_furiousforest", name: "Unlock Furious Forest", desc: "Complete Mad Forest." },
+        { id: "lv_librarywestwing", name: "Unlock Library West Wing", desc: "Complete Inlaid Library." },
+        { id: "lv_teenybridge", name: "Unlock Teeny Bridge", desc: "Reach Level 15 in Inlaid Library." },
+        { id: "lv_dairyplant", name: "Unlock Dairy Plant", desc: "Complete Teeny Bridge." },
+        { id: "lv_berserkwood", name: "Berserk Wood", desc: "Complete Furious Forest." },
+        { id: "lv_librarysanctum", name: "Unlock Library Sanctum", desc: "Complete Library West Wing." },
+        { id: "lv_milkfactory", name: "Unlock Milk Factory", desc: "Complete Dairy Plant." },
+        { id: "lv_weenybridge", name: "Unlock Weeny Bridge", desc: "Reach Level 15 in Dairy Plant." },
+        { id: "lv_meanybridge", name: "Unlock Meany Bridge", desc: "Defeat the Giant Enemy Crab in Gallo Tower." },
+        { id: "lv_curdrefinery", name: "Unlock Curd Refinery", desc: "Complete Milk Factory." },
+        { id: "lv_cappellamagna", name: "Unlock Cappella Magna", desc: "Complete Meany Bridge." },
+        { id: "lv_cappellaultima", name: "Unlock Cappella Ultima", desc: "Complete Cappella Magna." }
+      ]
+    },
+    {
+      title: "DLC: Passives",
+      desc: "11 of 13.",
+      items: [
+        { id: "ps_hollowheart", name: "Hollow Heart", desc: "Reach Level 10." },
+        { id: "ps_crown", name: "Crown", desc: "Reach Level 15." },
+        { id: "ps_spellbinder", name: "Spellbinder", desc: "Play Runetracer cards 10 times." },
+        { id: "ps_stonemask", name: "Stone Mask", desc: "Find and play a Stone Mask." },
+        { id: "ps_bracer", name: "Bracer", desc: "Play King Bible cards 99 times." },
+        { id: "ps_emptytome", name: "Empty Tome", desc: "Collect 2 Mana Orbs." },
+        { id: "ps_pummarola", name: "Pummarola", desc: "Reach Level 10 with Gennaro Belpaese." },
+        { id: "ps_attractorb", name: "Attractorb", desc: "Find and play Vacuum cards." },
+        { id: "ps_skullomaniac", name: "Skull O'Maniac", desc: "Reach Level 30 with Lama Ladonna." },
+        { id: "ps_duplicator", name: "Duplicator", desc: "Play Magic Wand cards lots of times." },
+        { id: "ps_tirajisu", name: "Tirajisú", desc: "Reach Level 20 with Krochi Fretto." },
+        { id: "ps_clover", name: "Clover", desc: "Find and play Little Clover cards." },
+        { id: "ps_candelabrador", name: "Candelabrador", desc: "Play 3 Santa Water cards." }
+      ]
+    },
+    {
+      title: "DLC: Relics",
+      desc: "13 of 13 — complete.",
+      items: [
+        { id: "rl_combostack", name: "Combo Stack", desc: "Found these Pancakes in the Tutorial." },
+        { id: "rl_gemhammer", name: "Gem Hammer", desc: "Find the Gem Hammer Relic." },
+        { id: "rl_guidinglight", name: "Guiding Light", desc: "Find the Guiding Light Relic." },
+        { id: "rl_polentir", name: "Polentír", desc: "Find the Polentír Relic." },
+        { id: "rl_relicmuseum", name: "Relic Museum", desc: "Play two dungeons." },
+        { id: "rl_grimgrimoire", name: "Grim Grimoire", desc: "Find the Grim Grimoire Relic." },
+        { id: "rl_overkill", name: "Overkill", desc: "Find the Overkill Relic." },
+        { id: "rl_stardustanvil", name: "Stardust Anvil", desc: "Find the Stardust Anvil Relic." },
+        { id: "rl_randomazzo", name: "Randomazzo", desc: "Find the Randomazzo Relic." },
+        { id: "rl_bombainfernale", name: "Bomba Infernale", desc: "Find the Bomba Infernale Relic." },
+        { id: "rl_lapidaryloupe", name: "Lapidary Loupe", desc: "Find the Lapidary Loupe Relic." },
+        { id: "rl_sorceresstears", name: "Sorceress' Tears", desc: "Find the Sorceress' Tears Relic." },
+        { id: "rl_ultimateultraoverkill", name: "Ultimate Ultra Overkill", desc: "Find the Ultimate Ultra Overkill Relic." }
+      ]
+    },
+    {
+      title: "DLC: Gem 1",
+      desc: "13 of 13 — complete.",
+      items: [
+        { id: "g1_nduja", name: "Nduja Gem", desc: "Defeat Nesufritto." },
+        { id: "g1_manarebate", name: "Mana Rebate Gem", desc: "Gain lots and lots and lots of Mana in a turn." },
+        { id: "g1_bluetrigger", name: "Blue Trigger Gem", desc: "Play lots of blue cards." },
+        { id: "g1_bombard", name: "Bombard Gem", desc: "Play lots of Cherry Bomb cards." },
+        { id: "g1_growth", name: "Growth Gem", desc: "Play Crown cards." },
+        { id: "g1_calcium", name: "Calcium Gem", desc: "Play lots of Bone cards." },
+        { id: "g1_countdown", name: "Countdown Gem", desc: "Play lots of Empty Tome cards." },
+        { id: "g1_copy", name: "Copy Gem", desc: "Play lots and lots of cards." },
+        { id: "g1_decimate", name: "Decimate Gem", desc: "Deal lots and lots of damage." },
+        { id: "g1_destroy", name: "Destroy Gem", desc: "Play lots of cards picked up from light sources." },
+        { id: "g1_easycombo", name: "Easy Combo Gem", desc: "Reach 5 Combo or above." },
+        { id: "g1_refund", name: "Refund Gem", desc: "Gain lots of Mana in a turn." },
+        { id: "g1_mild", name: "Mild Gem", desc: "Complete Gallo Tower with Gallo." }
+      ]
+    },
+    {
+      title: "DLC: Gem 2",
+      desc: "13 of 13 — complete.",
+      items: [
+        { id: "g2_drain", name: "Drain Gem", desc: "Heal lots of HP." },
+        { id: "g2_duration", name: "Duration Gem", desc: "Play Spellbinder cards." },
+        { id: "g2_freetoplay", name: "Free To Play Gem", desc: "Play lots and lots of Free-to-Play cards." },
+        { id: "g2_freeze", name: "Freeze Gem", desc: "Play Clock Lancet card." },
+        { id: "g2_restorehealth", name: "Restore Health Gem", desc: "Play lots of Pummarola cards." },
+        { id: "g2_cointcount", name: "Coin Count Gem", desc: "Collect a vast fortune of coins." },
+        { id: "g2_luck", name: "Luck Gem", desc: "Play Clover cards." },
+        { id: "g2_magichat", name: "Magic Hat Gem", desc: "Play lots of Peachone cards." },
+        { id: "g2_magnetic", name: "Magnetic Gem", desc: "Play lots and lots of cards." },
+        { id: "g2_manacost1", name: "Mana Cost Gems", desc: "Collect lots of Mana Orbs." },
+        { id: "g2_manacost2", name: "Mana Cost Gems 2", desc: "Collect lots and lots of Mana Orbs." },
+        { id: "g2_midas", name: "Midas Gem", desc: "Collect lots and lots and lots of coins." },
+        { id: "g2_remote", name: "Remote Gem", desc: "Destroy lots and lots of Mine Carts." }
+      ]
+    },
+    {
+      title: "DLC: Gem 3",
+      desc: "13 of 13 — complete.",
+      items: [
+        { id: "g3_purpletrigger", name: "Purple Trigger Gem", desc: "Play lots and lots of purple cards." },
+        { id: "g3_redtrigger", name: "Red Trigger Gem", desc: "Play lots of red cards." },
+        { id: "g3_retain", name: "Retain Gem", desc: "Have 7 cards in a Hand." },
+        { id: "g3_return", name: "Return Gem", desc: "Play lots of cards." },
+        { id: "g3_reversecombo", name: "Reverse Combo Gem", desc: "Reach a high Combo." },
+        { id: "g3_armorstrike", name: "Armor Strike Gem", desc: "Gain lots of Armor in a turn." },
+        { id: "g3_recycle", name: "Recycle Gem", desc: "Have 8 cards in a Hand." },
+        { id: "g3_mug", name: "Mug Gem", desc: "Collect lots of coins." },
+        { id: "g3_quickdraw", name: "Quick Draw Gem", desc: "Reach 30 Deck size." },
+        { id: "g3_coincard", name: "Coin Card Gem", desc: "Find and play lots of Big Coin Bag cards." },
+        { id: "g3_tripledamage", name: "Triple Damage Gem", desc: "Deal lots of damage." },
+        { id: "g3_wild", name: "Wild Gem", desc: "Play lots and lots of Wild cards." },
+        { id: "g3_yellowtrigger", name: "Yellow Trigger Gem", desc: "Play lots of yellow cards." }
+      ]
+    },
+    {
+      title: "DLC: Gem 4",
+      desc: "11 of 13.",
+      items: [
+        { id: "g4_poe", name: "Poe", desc: "Play Garlic cards lots of times." },
+        { id: "g4_friendshipamulet", name: "Friendship Amulet", desc: "Reach a very high Combo." },
+        { id: "g4_parmaegis", name: "Parm Aegis", desc: "Reach a very very high Combo." },
+        { id: "g4_fireproof", name: "Fireproof Gem", desc: "Complete Curd Refinery." },
+        { id: "g4_crawlercaller", name: "Crawler Caller Gem", desc: "Complete Library Sanctum." },
+        { id: "g4_yinyang", name: "Yin Yang Gem", desc: "Complete Berserk Wood." },
+        { id: "g4_echo", name: "Echo Gem", desc: "Play lots and lots and lots and lots of cards." },
+        { id: "g4_leader", name: "Leader Gem", desc: "Deal lots and lots and lots of damage." },
+        { id: "g4_rainbow", name: "Rainbow Gem", desc: "Activate lots of Crawler trigger abilities." },
+        { id: "g4_killcount", name: "Kill Count Gem", desc: "Defeat many, many, many enemies." },
+        { id: "g4_uncrackable", name: "Uncrackable Gem", desc: "Defeat The Trickster.",
+          note: "Boss fight, not a grind — the odd one out in this pack." },
+        { id: "g4_manaxdamage", name: "Mana X Damage Gem", desc: "Play lots and lots and lots of purple cards." },
+        { id: "g4_greed", name: "Greed Gem", desc: "Play Stone Mask cards 10 times." }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>
