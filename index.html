@@ -25,6 +25,16 @@
     <div class="track"><div class="fill" id="allFill" style="width:0%"></div></div>
   </div>
 
+  <a class="cabinet-link" href="cabinet.html">
+    <span>
+      <span class="cabinet-link-title">Trophy Cabinet</span>
+      <span class="cabinet-link-sub">See your completed games on display</span>
+    </span>
+    <span class="cabinet-link-arrow">&rarr;</span>
+  </a>
+
+  <div id="activitySection"></div>
+
   <p class="section-label">Games</p>
   <div class="games" id="games"></div>
 
@@ -34,55 +44,8 @@
   </footer>
 </div>
 
+<script src="games.js"></script>
 <script>
-/* ---------------------------------------------------------------------
-   ADDING A GAME
-   1. Upload its .html file (built from the same template).
-   2. Add an entry below. `key` must match the `key` in that page's
-      Tracker.init({...}) call — that's how progress is read.
-
-   ICONS — pick one style per game:
-     icon: "GT"                     two letters (default)
-     emoji: "\u{1F47B}"             any emoji
-     image: "covers/ghost-trick.jpg"  box art (see below)
-
-   BOX ART
-     Make a folder called `covers` in the repo and upload images into it.
-     Square images look best (PS Store icons are already square); anything
-     else gets centre-cropped to fit. ~200x200px is plenty — big files just
-     slow the page down. If an image is missing or the filename is wrong,
-     the tile quietly falls back to the letters.
---------------------------------------------------------------------- */
-const GAMES = [
-  {
-    title: "Ghost Trick: Phantom Detective",
-    platform: "PS4",
-    file: "ghost-trick.html",
-    key: "ghost-trick",
-    icon: "GT",
-    image: "covers/ghost-trick.png",   // PNG
-    color: "#ff6b4a"
-  },
-  {
-    title: "Stardew Valley",
-    platform: "PS4",
-    file: "stardew.html",
-    key: "stardew",
-    icon: "SV",
-    image: "covers/stardew.png",       // extension is auto-detected either way
-    color: "#7cc48f"
-  },
-  {
-    title: "Vampire Crawlers",
-    platform: "PS5",
-    file: "vampire-crawlers.html",
-    key: "vampire-crawlers",
-    icon: "VC",
-    image: "covers/vampire-crawlers.png",
-    color: "#8b1a2b"
-  }
-];
-
 function readSummary(key) {
   try {
     const raw = localStorage.getItem(key + "-summary-v2");
@@ -94,6 +57,25 @@ function readSummary(key) {
   return { done: 0, total: 0 };
 }
 
+function readActivity(key, title) {
+  try {
+    const raw = localStorage.getItem(key + "-activity-v1");
+    if (raw) return JSON.parse(raw).map((a) => Object.assign({ game: title }, a));
+  } catch (e) {}
+  return [];
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const min = 60000, hr = 3600000, day = 86400000;
+  if (diff < hr) return Math.max(1, Math.round(diff / min)) + "m ago";
+  if (diff < day) return Math.round(diff / hr) + "h ago";
+  const days = Math.round(diff / day);
+  if (days === 1) return "yesterday";
+  if (days < 7) return days + "d ago";
+  return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -101,7 +83,32 @@ function el(tag, cls, text) {
   return n;
 }
 
-function render() {
+function renderActivity() {
+  const container = document.getElementById("activitySection");
+  container.innerHTML = "";
+
+  const sevenDaysAgo = Date.now() - 7 * 86400000;
+  let all = [];
+  GAMES.forEach((g) => { all = all.concat(readActivity(g.key, g.title)); });
+  all = all.filter((a) => a.ts >= sevenDaysAgo).sort((a, b) => b.ts - a.ts).slice(0, 8);
+
+  if (all.length === 0) return; // nothing in the last 7 days — stay out of the way
+
+  const label = el("p", "section-label", "Recent Activity");
+  container.appendChild(label);
+
+  const panel = el("div", "activity-panel");
+  all.forEach((a) => {
+    const item = el("div", "activity-item");
+    item.appendChild(el("span", "activity-trophy", a.name));
+    item.appendChild(el("span", "activity-game", a.game));
+    item.appendChild(el("span", "activity-time", timeAgo(a.ts)));
+    panel.appendChild(item);
+  });
+  container.appendChild(panel);
+}
+
+function renderGames() {
   const container = document.getElementById("games");
   container.innerHTML = "";
 
@@ -112,8 +119,13 @@ function render() {
     return;
   }
 
-  GAMES.forEach((g) => {
-    const s = readSummary(g.key);
+  // Most recently updated first; games with no activity yet keep their
+  // original order and sink to the bottom.
+  const withSummary = GAMES.map((g) => Object.assign({ _summary: readSummary(g.key) }, g));
+  withSummary.sort((a, b) => (b._summary.updated || 0) - (a._summary.updated || 0));
+
+  withSummary.forEach((g) => {
+    const s = g._summary;
     const pct = s.total ? Math.round((s.done / s.total) * 100) : 0;
     const complete = s.total > 0 && s.done === s.total;
     sumDone += s.done;
@@ -130,23 +142,15 @@ function render() {
       thumb.style.background = g.color;
       const img = document.createElement("img");
       img.alt = "";
-      // Try the listed file first; if it's missing, try the other common
-      // image extensions before giving up and showing the letters. This
-      // means .png vs .jpg never matters.
       const base = g.image.replace(/\.(png|jpg|jpeg|webp)$/i, "");
       const exts = ["png", "jpg", "jpeg", "webp"];
-      const listed = (g.image.match(/\.(png|jpg|jpeg|webp)$/i) || [".png"])[0]
-        .slice(1).toLowerCase();
+      const listed = (g.image.match(/\.(png|jpg|jpeg|webp)$/i) || [".png"])[0].slice(1).toLowerCase();
       const tries = [listed].concat(exts.filter((e) => e !== listed));
       let attempt = 0;
       img.addEventListener("error", function () {
         attempt++;
-        if (attempt < tries.length) {
-          img.src = base + "." + tries[attempt];
-        } else {
-          img.remove();
-          thumb.textContent = initials;
-        }
+        if (attempt < tries.length) img.src = base + "." + tries[attempt];
+        else { img.remove(); thumb.textContent = initials; }
       });
       img.src = base + "." + tries[0];
       thumb.appendChild(img);
@@ -163,8 +167,7 @@ function render() {
     if (complete) title.appendChild(el("span", "badge plat", "Platinum"));
     meta.appendChild(title);
     meta.appendChild(el("div", "game-sub",
-      g.platform + (s.total ? " · " + s.done + " of " + s.total + " trophies"
-                            : " · not started")));
+      g.platform + (s.total ? " · " + s.done + " of " + s.total + " trophies" : " · not started")));
 
     const pctEl = el("div", "game-pct" + (complete ? " complete" : ""), pct + "%");
 
@@ -175,9 +178,7 @@ function render() {
     const track = el("div", "game-track");
     const fill = el("div", "game-fill");
     fill.style.width = pct + "%";
-    fill.style.background = complete
-      ? "linear-gradient(90deg,#ffd479,#fff0c2)"
-      : g.color;
+    fill.style.background = complete ? "linear-gradient(90deg,#ffd479,#fff0c2)" : g.color;
     track.appendChild(fill);
 
     a.appendChild(top);
@@ -192,10 +193,12 @@ function render() {
   document.getElementById("allFill").style.width = allPct + "%";
 }
 
-render();
-window.addEventListener("pageshow", render);
+function renderAll() { renderActivity(); renderGames(); }
+
+renderAll();
+window.addEventListener("pageshow", renderAll);
 document.addEventListener("visibilitychange", function () {
-  if (!document.hidden) render();
+  if (!document.hidden) renderAll();
 });
 </script>
 </body>

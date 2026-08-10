@@ -24,10 +24,19 @@
 
    STORAGE
    -------
-   State is one object: { itemId: true } for checks, { itemId: 137 } for
-   counters, child ids stored individually. A separate `summary` key holds
-   { done, total } so the hub can show progress without knowing the
-   internals of each game.
+   <key>-progress-v2  { itemId: true|number, "note::itemId": "text" }
+   <key>-summary-v2   { done, total, updated, completedAt? } — read by the
+                       hub and trophy cabinet without needing game internals.
+   <key>-activity-v1  [{ name, game, ts }, ...] — logged whenever a
+                       top-level trophy transitions from incomplete to
+                       complete. Capped at the last 100 entries. Powers the
+                       hub's "recent activity" panel.
+
+   BUILT-IN UI (no per-game HTML needed)
+   --------------------------------------
+   A search box and, if the game has any sublists, Expand all / Collapse
+   all buttons are injected automatically above #sections. Each top-level
+   trophy also gets a small personal-note toggle.
    ===================================================================== */
 
 const Tracker = (function () {
@@ -37,17 +46,22 @@ const Tracker = (function () {
   const CARET_SVG =
     '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">' +
     '<path d="M6 3L11 8L6 13" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const SEARCH_SVG =
+    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">' +
+    '<circle cx="7" cy="7" r="5"/><path d="M11 11L15 15" stroke-linecap="round"/></svg>';
 
   let cfg = null;
   let state = {};
   let openGroups = {};
+  let openNotes = {};
+  let searchTerm = "";
 
-  /* ---------- storage ---------- */
+  /* ---------- storage keys ---------- */
   function progressKey() { return cfg.key + "-progress-v2"; }
   function summaryKey()  { return cfg.key + "-summary-v2"; }
+  function activityKey() { return cfg.key + "-activity-v1"; }
 
   function load() {
-    // migrate from the old v1 format if present
     try {
       const v2 = localStorage.getItem(progressKey());
       if (v2) return JSON.parse(v2);
@@ -60,7 +74,6 @@ const Tracker = (function () {
     } catch (e) {}
     const seed = {};
     (cfg.earned || []).forEach((id) => (seed[id] = true));
-    // counters already at a known value, e.g. { ghosts: 444 }
     Object.keys(cfg.counters || {}).forEach((id) => (seed[id] = cfg.counters[id]));
     return seed;
   }
@@ -70,9 +83,14 @@ const Tracker = (function () {
     try {
       localStorage.setItem(progressKey(), JSON.stringify(state));
       const t = totals();
-      localStorage.setItem(summaryKey(), JSON.stringify({
-        done: t.done, total: t.total, updated: Date.now()
-      }));
+      let prevSummary = {};
+      try { prevSummary = JSON.parse(localStorage.getItem(summaryKey()) || "{}"); } catch (e) {}
+      const summary = { done: t.done, total: t.total, updated: Date.now() };
+      // stamp the first moment a game hits 100%, for the trophy cabinet
+      if (t.total > 0 && t.done === t.total) {
+        summary.completedAt = prevSummary.completedAt || Date.now();
+      }
+      localStorage.setItem(summaryKey(), JSON.stringify(summary));
       if (el) {
         el.textContent = "Saved to this device automatically.";
         el.classList.remove("bad");
@@ -85,11 +103,17 @@ const Tracker = (function () {
     }
   }
 
+  function logActivity(name) {
+    try {
+      const raw = localStorage.getItem(activityKey());
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.push({ name: name, game: cfg.title, ts: Date.now() });
+      while (arr.length > 100) arr.shift();
+      localStorage.setItem(activityKey(), JSON.stringify(arr));
+    } catch (e) {}
+  }
+
   /* ---------- completion logic ---------- */
-  // Flattens a children array one or two levels deep. Entries may be:
-  //   { id, name }                       a tickable item
-  //   { group: "Fertilizer", children }  a collapsible sub-category
-  //   { group: "Pantry" }                a plain (non-collapsing) label
   function realChildren(item) {
     const out = [];
     (item.children || []).forEach((c) => {
@@ -132,6 +156,32 @@ const Tracker = (function () {
     return { done: items.filter(isComplete).length, total: items.length };
   }
 
+  /* ---------- search matching ---------- */
+  function textMatches(str, term) {
+    return !!(str || "").toLowerCase().includes(term);
+  }
+
+  function childMatches(c, term) {
+    return textMatches(c.name, term) || textMatches(c.note, term);
+  }
+
+  function itemMatchesSearch(item, term) {
+    if (!term) return true;
+    if (textMatches(item.name, term) || textMatches(item.desc, term) || textMatches(item.note, term)) {
+      return true;
+    }
+    if (item.children) {
+      return item.children.some((c) => {
+        if (c.id) return childMatches(c, term);
+        if (c.children) {
+          return textMatches(c.group, term) || c.children.some((k) => k.id && childMatches(k, term));
+        }
+        return textMatches(c.group, term);
+      });
+    }
+    return false;
+  }
+
   /* ---------- rendering ---------- */
   function el(tag, cls, text) {
     const n = document.createElement(tag);
@@ -163,8 +213,10 @@ const Tracker = (function () {
     const of = el("span", "counter-of", "of " + item.target);
 
     function setVal(n) {
+      const wasComplete = isComplete(item);
       const clamped = Math.max(0, Math.min(item.target, Math.round(n) || 0));
       state[item.id] = clamped;
+      if (!wasComplete && isComplete(item)) logActivity(item.name);
       save();
       render();
     }
@@ -184,7 +236,7 @@ const Tracker = (function () {
     row.appendChild(wrap);
   }
 
-  function renderChildItem(c) {
+  function renderChildItem(c, parentItem) {
     const done = !!state[c.id];
     const child = el("div", "child" + (done ? " checked" : ""));
     const box = el("div", "child-box");
@@ -196,30 +248,37 @@ const Tracker = (function () {
     child.appendChild(textWrap);
     child.addEventListener("click", (e) => {
       e.stopPropagation();
+      const wasComplete = isComplete(parentItem);
       state[c.id] = !state[c.id];
+      if (!wasComplete && isComplete(parentItem)) logActivity(parentItem.name);
       save();
       render();
     });
     return child;
   }
 
-  function renderChildren(item, row) {
+  function renderChildren(item, row, term) {
     const wrap = el("div", "children");
 
     (item.children || []).forEach((c, idx) => {
       // a tickable item
       if (c.id) {
-        wrap.appendChild(renderChildItem(c));
+        if (term && !childMatches(c, term)) return;
+        wrap.appendChild(renderChildItem(c, item));
         return;
       }
 
       // a collapsible sub-category
       if (c.children) {
         const subKey = item.id + "::" + (c.group || idx);
-        const open = !!openGroups[subKey];
         const kids = c.children.filter((k) => k.id);
+        const visibleKids = term ? kids.filter((k) => childMatches(k, term)) : kids;
+        const groupNameMatches = !!(term && textMatches(c.group, term));
+        if (term && visibleKids.length === 0 && !groupNameMatches) return;
+
         const n = doneIn(kids);
         const full = kids.length > 0 && n === kids.length;
+        const open = term ? true : !!openGroups[subKey];
 
         const header = el("div",
           "subgroup" + (open ? " open" : "") + (full ? " full" : ""));
@@ -237,26 +296,63 @@ const Tracker = (function () {
 
         if (open) {
           const inner = el("div", "subgroup-items");
-          c.children.forEach((k) => {
-            if (k.id) inner.appendChild(renderChildItem(k));
-          });
+          const list = term ? (groupNameMatches ? kids : visibleKids) : kids;
+          list.forEach((k) => inner.appendChild(renderChildItem(k, item)));
           wrap.appendChild(inner);
         }
         return;
       }
 
-      // a plain, non-collapsing label
-      wrap.appendChild(el("div", "child-group-label", c.group));
+      // a plain, non-collapsing label — hide during search to reduce clutter
+      if (!term) wrap.appendChild(el("div", "child-group-label", c.group));
     });
 
     row.appendChild(wrap);
   }
 
-  function renderRow(item) {
+  function renderNote(item) {
+    const key = "note::" + item.id;
+    const val = state[key] || "";
+    const wrap = el("div", "note-block");
+
+    const toggle = el("button", "note-toggle" + (val ? " has-note" : ""),
+      val ? "\u270E Note" : "+ Add note");
+    toggle.type = "button";
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openNotes[item.id] = !openNotes[item.id];
+      render();
+    });
+    wrap.appendChild(toggle);
+
+    if (openNotes[item.id]) {
+      const area = el("div", "note-area open");
+      const textarea = document.createElement("textarea");
+      textarea.className = "note-input";
+      textarea.rows = 2;
+      textarea.placeholder = "Personal note — progress, reminders, anything";
+      textarea.value = val;
+      textarea.addEventListener("click", (e) => e.stopPropagation());
+      textarea.addEventListener("blur", () => {
+        const v = textarea.value.trim();
+        if (v) state[key] = v; else delete state[key];
+        save();
+        render();
+      });
+      area.appendChild(textarea);
+      wrap.appendChild(area);
+    } else if (val) {
+      wrap.appendChild(el("div", "note-preview", val));
+    }
+
+    return wrap;
+  }
+
+  function renderRow(item, term) {
     const complete = isComplete(item);
     const partial = isPartial(item);
     const isGroup = item.type === "group";
-    const open = !!openGroups[item.id];
+    const open = isGroup && (term ? true : !!openGroups[item.id]);
 
     const row = el("div",
       "row" + (complete ? " checked" : "") + (open ? " open" : "") +
@@ -296,7 +392,6 @@ const Tracker = (function () {
       head.appendChild(caret);
     }
 
-    // click behaviour depends on type
     if (isGroup) {
       head.addEventListener("click", () => {
         openGroups[item.id] = !openGroups[item.id];
@@ -304,7 +399,9 @@ const Tracker = (function () {
       });
     } else if (item.type !== "counter") {
       head.addEventListener("click", () => {
+        const wasComplete = isComplete(item);
         state[item.id] = !state[item.id];
+        if (!wasComplete && isComplete(item)) logActivity(item.name);
         save();
         render();
       });
@@ -312,24 +409,94 @@ const Tracker = (function () {
 
     row.appendChild(head);
     if (item.type === "counter") renderCounter(item, row);
-    if (isGroup) renderChildren(item, row);
+    if (isGroup) renderChildren(item, row, term);
+    row.appendChild(renderNote(item));
 
     return row;
   }
 
+  function hasAnyGroups() {
+    return cfg.sections.some((s) => s.items.some((i) => i.type === "group"));
+  }
+
+  function setAllGroups(open) {
+    cfg.sections.forEach((s) => s.items.forEach((item) => {
+      if (item.type === "group") {
+        openGroups[item.id] = open;
+        (item.children || []).forEach((c, idx) => {
+          if (c.children) openGroups[item.id + "::" + (c.group || idx)] = open;
+        });
+      }
+    }));
+    render();
+  }
+
+  function injectControls() {
+    const sectionsEl = document.getElementById("sections");
+    if (!sectionsEl || document.getElementById("trackerControls")) return;
+
+    const bar = el("div", "controls-bar");
+    bar.id = "trackerControls";
+
+    const searchWrap = el("div", "search-wrap");
+    const icon = el("span", "search-icon");
+    icon.innerHTML = SEARCH_SVG;
+    const input = document.createElement("input");
+    input.type = "search";
+    input.className = "search-input";
+    input.placeholder = "Search trophies\u2026";
+    input.value = searchTerm;
+    input.addEventListener("input", () => {
+      searchTerm = input.value.trim().toLowerCase();
+      render();
+      const box = document.querySelector(".search-input");
+      if (box) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
+    });
+    searchWrap.appendChild(icon);
+    searchWrap.appendChild(input);
+    bar.appendChild(searchWrap);
+
+    if (hasAnyGroups()) {
+      const btnWrap = el("div", "collapse-controls");
+      const expandBtn = el("button", "collapse-btn", "Expand all");
+      expandBtn.type = "button";
+      expandBtn.addEventListener("click", () => setAllGroups(true));
+      const collapseBtn = el("button", "collapse-btn", "Collapse all");
+      collapseBtn.type = "button";
+      collapseBtn.addEventListener("click", () => setAllGroups(false));
+      btnWrap.appendChild(expandBtn);
+      btnWrap.appendChild(collapseBtn);
+      bar.appendChild(btnWrap);
+    }
+
+    sectionsEl.parentNode.insertBefore(bar, sectionsEl);
+  }
+
   function render() {
+    injectControls();
     const container = document.getElementById("sections");
     container.innerHTML = "";
 
+    const term = searchTerm;
+    let visibleSections = 0;
+
     cfg.sections.forEach((s) => {
+      const items = term ? s.items.filter((item) => itemMatchesSearch(item, term)) : s.items;
+      if (items.length === 0) return;
+      visibleSections++;
+
       const sec = el("div", "section");
       sec.appendChild(el("h2", null, s.title));
       if (s.desc) sec.appendChild(el("p", "desc", s.desc));
       const rows = el("div", "rows");
-      s.items.forEach((item) => rows.appendChild(renderRow(item)));
+      items.forEach((item) => rows.appendChild(renderRow(item, term)));
       sec.appendChild(rows);
       container.appendChild(sec);
     });
+
+    if (term && visibleSections === 0) {
+      container.appendChild(el("div", "empty", "No trophies match \u201c" + term + "\u201d."));
+    }
 
     const t = totals();
     const pct = t.total ? Math.round((t.done / t.total) * 100) : 0;

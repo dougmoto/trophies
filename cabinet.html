@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Trophy Cabinet</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>On Display</div>
+  <h1>Trophy Cabinet</h1>
+  <p class="sub" id="cabinetSub">Completed games, lit up. Everything else is still on the shelf.</p>
+
+  <div class="cabinet-stats" id="cabinetStats"></div>
+
+  <div class="cabinet-grid" id="cabinetGrid"></div>
+</div>
+
+<script src="games.js"></script>
+<script>
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function readSummary(key) {
+  try {
+    const raw = localStorage.getItem(key + "-summary-v2");
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (typeof s.done === "number" && typeof s.total === "number") return s;
+    }
+  } catch (e) {}
+  return { done: 0, total: 0 };
+}
+
+function renderCard(g) {
+  const s = readSummary(g.key);
+  const pct = s.total ? Math.round((s.done / s.total) * 100) : 0;
+  const complete = s.total > 0 && s.done === s.total;
+
+  const a = el("a", "cabinet-card" + (complete ? " done" : " locked"));
+  a.href = g.file;
+
+  const initials = g.icon || g.title.slice(0, 2).toUpperCase();
+  if (g.image) {
+    const img = document.createElement("img");
+    img.className = "cabinet-cover";
+    img.alt = "";
+    const base = g.image.replace(/\.(png|jpg|jpeg|webp)$/i, "");
+    const exts = ["png", "jpg", "jpeg", "webp"];
+    const listed = (g.image.match(/\.(png|jpg|jpeg|webp)$/i) || [".png"])[0].slice(1).toLowerCase();
+    const tries = [listed].concat(exts.filter((e) => e !== listed));
+    let attempt = 0;
+    const fallback = el("div", "cabinet-cover-fallback", initials);
+    fallback.style.background = g.color;
+    fallback.style.display = "none";
+    img.addEventListener("error", function () {
+      attempt++;
+      if (attempt < tries.length) { img.src = base + "." + tries[attempt]; }
+      else { img.remove(); fallback.style.display = "flex"; }
+    });
+    img.src = base + "." + tries[0];
+    a.appendChild(img);
+    a.appendChild(fallback);
+  } else {
+    const fallback = el("div", "cabinet-cover-fallback", g.emoji || initials);
+    fallback.style.background = g.color;
+    a.appendChild(fallback);
+  }
+
+  a.appendChild(el("div", "cabinet-shine"));
+
+  if (complete) {
+    a.appendChild(el("div", "cabinet-ribbon", "Complete"));
+  } else if (s.total > 0) {
+    a.appendChild(el("div", "cabinet-pct", pct + "%"));
+  }
+
+  const info = el("div", "cabinet-info");
+  info.appendChild(el("div", "cabinet-title", g.title));
+  const subText = complete
+    ? "All " + s.total + " trophies"
+    : (s.total ? s.done + " / " + s.total + " trophies" : "Not started");
+  info.appendChild(el("div", "cabinet-sub", subText));
+  a.appendChild(info);
+
+  return a;
+}
+
+function render() {
+  const grid = document.getElementById("cabinetGrid");
+  grid.innerHTML = "";
+
+  if (!GAMES.length) {
+    grid.appendChild(el("div", "empty", "No games added yet."));
+    return;
+  }
+
+  let completedCount = 0;
+  let totalTrophies = 0;
+  let earnedTrophies = 0;
+
+  const withSummary = GAMES.map((g) => Object.assign({ _summary: readSummary(g.key) }, g));
+  // Completed games first (most recently completed first), then in-progress
+  // by percentage, then untouched games last.
+  withSummary.sort((a, b) => {
+    const aDone = a._summary.total > 0 && a._summary.done === a._summary.total;
+    const bDone = b._summary.total > 0 && b._summary.done === b._summary.total;
+    if (aDone !== bDone) return aDone ? -1 : 1;
+    if (aDone && bDone) return (b._summary.completedAt || 0) - (a._summary.completedAt || 0);
+    const aPct = a._summary.total ? a._summary.done / a._summary.total : -1;
+    const bPct = b._summary.total ? b._summary.done / b._summary.total : -1;
+    return bPct - aPct;
+  });
+
+  withSummary.forEach((g) => {
+    const s = g._summary;
+    if (s.total > 0 && s.done === s.total) completedCount++;
+    totalTrophies += s.total;
+    earnedTrophies += s.done;
+    grid.appendChild(renderCard(g));
+  });
+
+  const stats = document.getElementById("cabinetStats");
+  stats.innerHTML = "";
+  const addStat = (num, label) => {
+    const box = el("div", "cabinet-stat");
+    box.appendChild(el("div", "cabinet-stat-num", String(num)));
+    box.appendChild(el("div", "cabinet-stat-label", label));
+    stats.appendChild(box);
+  };
+  addStat(completedCount, completedCount === 1 ? "Game complete" : "Games complete");
+  addStat(earnedTrophies, "Trophies earned");
+  addStat(GAMES.length ? Math.round((earnedTrophies / Math.max(1, totalTrophies)) * 100) + "%" : "0%", "Overall");
+}
+
+render();
+window.addEventListener("pageshow", render);
+document.addEventListener("visibilitychange", function () {
+  if (!document.hidden) render();
+});
+</script>
+</body>
+</html>
