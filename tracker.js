@@ -78,7 +78,7 @@ const Tracker = (function () {
     return seed;
   }
 
-  function save() {
+  function save(fromInteraction) {
     const el = document.getElementById("statusLine");
     try {
       localStorage.setItem(progressKey(), JSON.stringify(state));
@@ -87,13 +87,22 @@ const Tracker = (function () {
       try { prevSummary = JSON.parse(localStorage.getItem(summaryKey()) || "{}"); } catch (e) {}
       const summary = { done: t.done, total: t.total, updated: Date.now() };
       // stamp the first moment a game hits 100%, for the trophy cabinet
+      const wasComplete = !!prevSummary.completedAt;
       if (t.total > 0 && t.done === t.total) {
         summary.completedAt = prevSummary.completedAt || Date.now();
       }
+      // the single partial trophy closest to finishing, for the hub's
+      // "Currently Grinding" widget — only meaningful across saves that
+      // came from an actual interaction, but harmless to compute always
+      const grind = grindingCandidate();
+      if (grind) summary.grinding = grind;
       localStorage.setItem(summaryKey(), JSON.stringify(summary));
       if (el) {
         el.textContent = "Saved to this device automatically.";
         el.classList.remove("bad");
+      }
+      if (fromInteraction && !wasComplete && summary.completedAt) {
+        celebrate();
       }
     } catch (e) {
       if (el) {
@@ -154,6 +163,64 @@ const Tracker = (function () {
   function totals() {
     const items = allItems();
     return { done: items.filter(isComplete).length, total: items.length };
+  }
+
+  // The partial (counter or sublist) trophy with the least remaining work,
+  // preferring ones you've already started over untouched ones. Stored in
+  // the summary so the hub can compare "closest to finishing" across every
+  // game without needing to know each game's trophy definitions.
+  function grindingCandidate() {
+    const candidates = allItems().filter((i) =>
+      (i.type === "counter" || i.type === "group") && !isComplete(i));
+    if (!candidates.length) return null;
+
+    function remaining(item) {
+      if (item.type === "counter") return item.target - (state[item.id] || 0);
+      const kids = realChildren(item);
+      return kids.length - childDone(item);
+    }
+
+    candidates.sort((a, b) => {
+      const pa = isPartial(a) ? 0 : 1;
+      const pb = isPartial(b) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      return remaining(a) - remaining(b);
+    });
+
+    const top = candidates[0];
+    return {
+      name: top.name,
+      remaining: remaining(top),
+      total: top.type === "counter" ? top.target : realChildren(top).length,
+      kind: top.type
+    };
+  }
+
+  // A brief confetti burst + banner, shown once per game the moment it
+  // first hits 100% from an actual interaction (never on page load or
+  // backup restore, so it can't fire repeatedly for an already-done game).
+  function celebrate() {
+    try {
+      const overlay = document.createElement("div");
+      overlay.className = "celebrate-overlay";
+      const colors = ["#ff6b4a", "#ffb84a", "#ffd479", "#34d399", "#7cc4ff"];
+      for (let i = 0; i < 46; i++) {
+        const p = document.createElement("div");
+        p.className = "confetti-piece";
+        p.style.left = (Math.random() * 100) + "vw";
+        p.style.background = colors[i % colors.length];
+        p.style.animationDelay = (Math.random() * 0.35) + "s";
+        p.style.animationDuration = (2 + Math.random() * 1.2) + "s";
+        p.style.transform = "rotate(" + Math.floor(Math.random() * 360) + "deg)";
+        overlay.appendChild(p);
+      }
+      const banner = document.createElement("div");
+      banner.className = "celebrate-banner";
+      banner.textContent = "\uD83C\uDFC6 " + cfg.title + " complete!";
+      overlay.appendChild(banner);
+      document.body.appendChild(overlay);
+      setTimeout(() => overlay.remove(), 3600);
+    } catch (e) {}
   }
 
   /* ---------- search matching ---------- */
@@ -217,7 +284,7 @@ const Tracker = (function () {
       const clamped = Math.max(0, Math.min(item.target, Math.round(n) || 0));
       state[item.id] = clamped;
       if (!wasComplete && isComplete(item)) logActivity(item.name);
-      save();
+      save(true);
       render();
     }
 
@@ -251,7 +318,7 @@ const Tracker = (function () {
       const wasComplete = isComplete(parentItem);
       state[c.id] = !state[c.id];
       if (!wasComplete && isComplete(parentItem)) logActivity(parentItem.name);
-      save();
+      save(true);
       render();
     });
     return child;
@@ -402,7 +469,7 @@ const Tracker = (function () {
         const wasComplete = isComplete(item);
         state[item.id] = !state[item.id];
         if (!wasComplete && isComplete(item)) logActivity(item.name);
-        save();
+        save(true);
         render();
       });
     }

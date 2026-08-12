@@ -25,6 +25,8 @@
     <div class="track"><div class="fill" id="allFill" style="width:0%"></div></div>
   </div>
 
+  <div id="grindingSection"></div>
+
   <a class="cabinet-link" href="cabinet.html">
     <span>
       <span class="cabinet-link-title">Trophy Cabinet</span>
@@ -193,7 +195,39 @@ function renderGames() {
   document.getElementById("allFill").style.width = allPct + "%";
 }
 
-function renderAll() { renderActivity(); renderGames(); }
+function renderGrinding() {
+  const container = document.getElementById("grindingSection");
+  container.innerHTML = "";
+
+  let best = null;
+  GAMES.forEach((g) => {
+    const s = readSummary(g.key);
+    if (s.grinding && s.grinding.remaining > 0) {
+      const cand = Object.assign({ gameFile: g.file, gameTitle: g.title }, s.grinding);
+      if (!best || cand.remaining < best.remaining) best = cand;
+    }
+  });
+  if (!best) return; // nothing partially in progress — stay out of the way
+
+  const a = el("a", "grinding-link");
+  a.href = best.gameFile;
+  a.appendChild(el("div", "grinding-eyebrow", "Currently Grinding"));
+
+  const unit = best.kind === "counter" ? "more" : (best.remaining === 1 ? "item" : "items");
+  a.appendChild(el("div", "grinding-main", best.remaining + " " + unit + " to go \u2014 " + best.name));
+  a.appendChild(el("div", "grinding-game", best.gameTitle));
+
+  const pct = best.total ? Math.round(((best.total - best.remaining) / best.total) * 100) : 0;
+  const track = el("div", "grinding-track");
+  const fill = el("div", "grinding-fill");
+  fill.style.width = pct + "%";
+  track.appendChild(fill);
+  a.appendChild(track);
+
+  container.appendChild(a);
+}
+
+function renderAll() { renderGrinding(); renderActivity(); renderGames(); }
 
 renderAll();
 window.addEventListener("pageshow", renderAll);
