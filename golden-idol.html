@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>The Case of the Golden Idol — Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>Case File — Trophy Tracker</div>
+  <h1 id="gameTitle"></h1>
+  <p class="sub" id="gameSub"></p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Progress</span>
+      <span class="panel-count">
+        <span id="doneCount">0</span> / <span id="totalCount">0</span>
+        <em id="pctLabel">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="barFill" style="width:0%"></div></div>
+    <div class="status-line" id="statusLine">Saved to this device automatically.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="backup">
+    <h3>Backup / transfer to another device</h3>
+    <textarea id="codeBox" rows="2" readonly placeholder="Your progress code appears here"></textarea>
+    <div class="backup-actions">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Paste &amp; restore</button>
+    </div>
+    <div class="backup-msg" id="backupMsg"></div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+Tracker.init({
+  key: "golden-idol",
+  title: "The Case of the Golden Idol",
+  subtitle: "18 trophies · PS5 · No Platinum · 4 Gold, 9 Silver, 5 Bronze",
+
+  // Earned as of 6 Sep 2026: all 12 base game cases, all three cases of
+  // The Spider of Lanka DLC, and 2 of 3 Lemurian Vampire cases.
+  earned: [
+    "b1","b2","b3","b4","b5","b6","b7","b8","b9","b10","b11","b12",
+    "sl1","sl2","sl3","lv1","lv2"
+  ],
+
+  sections: [
+    {
+      title: "Base Game",
+      desc: "12 of 12 — complete. One trophy per case, awarded in order as you solve each mystery.",
+      items: [
+        { id: "b1", name: "First Case", desc: "'An Abrupt Termination of Contract' solved." },
+        { id: "b2", name: "Second Case", desc: "'The Untimely Passing of a Rural Gentleman' solved." },
+        { id: "b3", name: "Third Case", desc: "'The Dramatic Departure of an Outsider' solved." },
+        { id: "b4", name: "Fourth Case", desc: "'The Murder at the Little Mermaid' solved." },
+        { id: "b5", name: "Fifth Case", desc: "'The Intoxicating Dinner Party' solved." },
+        { id: "b6", name: "Sixth Case", desc: "'The Explosive Events in the Forest Cabin' solved." },
+        { id: "b7", name: "Seventh Case", desc: "'The Strange Practices of a Secretive Society' solved." },
+        { id: "b8", name: "Eighth Case", desc: "'The Crowning Celebration by The Lighthouse' solved." },
+        { id: "b9", name: "Ninth Case", desc: "'The Interrupted Weekend at the Doctor's Salon' solved." },
+        { id: "b10", name: "Tenth Case", desc: "'The Triumph of Order' solved." },
+        { id: "b11", name: "Eleventh Case", desc: "'The Slight Delay in the Peaceful March to the King's Castle' solved." },
+        { id: "b12", name: "Epilogue Case", desc: "'The Grand Vision of a Better World' solved." }
+      ]
+    },
+    {
+      title: "DLC: The Spider of Lanka",
+      desc: "1 of 3.",
+      items: [
+        { id: "sl1", name: "The Spider of Lanka 1st Case", desc: "'The Overly Enthusiastic Card Game Tournament in the Yellow Lily' solved." },
+        { id: "sl2", name: "The Spider of Lanka 2nd Case", desc: "'The Unfortunate Accident in the Raja's Court' solved." },
+        { id: "sl3", name: "The Spider of Lanka 3rd Case", desc: "'In the Web of the Spider' solved." }
+      ]
+    },
+    {
+      title: "DLC: The Lemurian Vampire",
+      desc: "0 of 3.",
+      items: [
+        { id: "lv1", name: "The Lemurian Vampire 1st Case", desc: "'The Enigmatic Expiration in a Harmonious Island Commune' solved." },
+        { id: "lv2", name: "The Lemurian Vampire 2nd Case", desc: "'The Lemurian Vampire Strikes!' solved." },
+        { id: "lv3", name: "The Lemurian Vampire 3rd Case", desc: "'The Less than Amicable Departure of Two Explorers' solved." }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

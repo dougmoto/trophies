@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Mina the Hollower — Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>Graveyard Log — Trophy Tracker</div>
+  <h1 id="gameTitle"></h1>
+  <p class="sub" id="gameSub"></p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Progress</span>
+      <span class="panel-count">
+        <span id="doneCount">0</span> / <span id="totalCount">0</span>
+        <em id="pctLabel">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="barFill" style="width:0%"></div></div>
+    <div class="status-line" id="statusLine">Saved to this device automatically.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="backup">
+    <h3>Backup / transfer to another device</h3>
+    <textarea id="codeBox" rows="2" readonly placeholder="Your progress code appears here"></textarea>
+    <div class="backup-actions">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Paste &amp; restore</button>
+    </div>
+    <div class="backup-msg" id="backupMsg"></div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+Tracker.init({
+  key: "mina-hollower",
+  title: "Mina the Hollower",
+  subtitle: "50 trophies · PS5 · 1 Platinum, 3 Gold, 6 Silver, 40 Bronze",
+
+  // Earned as of 19 Jul 2026 — verified against 3 screenshots covering the
+  // full list with no gaps (counted exactly 50 unique trophies).
+  earned: ["thornebeater", "sparksofgenius", "bigspender", "firstpurchase", "boundingbonanza", "traumatized", "trashjuggler"],
+
+  sections: [
+    {
+      title: "Progression",
+      items: [
+        { id: "hollowvictory", name: "Hollow Victory", desc: "Reach the conclusion of the game." },
+        { id: "hollowinagain", name: "Hollowin' Again!", desc: "Finish the game in New Game Plus." },
+        { id: "speedrunner", name: "Speed Runner", desc: "Complete the game in under 4 hours." },
+        { id: "thornebeater", name: "Thorne Beater", desc: "Defeat Thorne for the first time." }
+      ]
+    },
+    {
+      title: "Collection & Economy",
+      items: [
+        { id: "fullyequipped", name: "Fully Equipped", desc: "Unlock all Weapons, Trinkets, Cloaks, and Upgrades." },
+        { id: "fishinreactor", name: "Fishin' Reactor", desc: "Acquire all trophies on the Fish Board." },
+        { id: "bigspender", name: "Big Spender", desc: "Spend a combined 50,000 Bones in shops." },
+        { id: "firstpurchase", name: "First Purchase", desc: "Buy your first item." },
+        { id: "pawnedoff", name: "Pawned Off", desc: "Sell the maximum number of items at Pawnty's Exchange." },
+        { id: "bonestonetycoon", name: "Bonestone Tycoon", desc: "Convert over 20,000 in the Bone Sinterer in one go." },
+        { id: "sparksofgenius", name: "Sparks of Genius", desc: "Restore half of the Spark Generators." }
+      ]
+    },
+    {
+      title: "Challenge Runs",
+      desc: "Full-game runs with a restriction. Plan the save file for these before you start.",
+      items: [
+        { id: "hardifier", name: "Hardifier", desc: "Finish the game with 3 active Hard Modifiers." },
+        { id: "weirdifier", name: "Weirdifier", desc: "Finish the game with 3 active Weird Modifiers." },
+        { id: "bonepincher", name: "Bone Pincher", desc: "Finish the game without spending any Bones in shops." },
+        { id: "bonekeeper", name: "Bone Keeper", desc: "Complete the game without ever losing your Bones." },
+        { id: "offthegrid", name: "Off the Grid", desc: "Finish the game without ever entering the Underlab." },
+        { id: "belowzero", name: "Below Zero", desc: "Finish the game with -1% Collection or less." },
+        { id: "lopsided", name: "Lopsided", desc: "Raise one stat to 10 while keeping all others at 3 or below." }
+      ]
+    },
+    {
+      title: "Boss Feats",
+      items: [
+        { id: "untouchable", name: "Untouchable", desc: "Defeat a Spark Generator boss without taking damage." },
+        { id: "renegaderoundup", type: "group", name: "Renegade Roundup",
+          desc: "Defeat Armand, Maxi, Willis, the Dugin, and Evra.",
+          children: [
+            { id: "rr_armand", name: "Armand" },
+            { id: "rr_maxi", name: "Maxi" },
+            { id: "rr_willis", name: "Willis" },
+            { id: "rr_dugin", name: "the Dugin" },
+            { id: "rr_evra", name: "Evra" }
+          ]},
+        { id: "masochist", name: "Masochist", desc: "Defeat a boss while wearing exactly 3 Beastium Trinkets." },
+        { id: "sniperdagger", name: "Sniper Dagger", desc: "Kill a boss with Whisper and Vesper thrown from across the screen." },
+        { id: "hammerama", name: "Hammerama", desc: "Defeat a boss using only fully charged attacks from the Blaststrike Maul." },
+        { id: "shocktactician", name: "Shock Tactician", desc: "Defeat a boss using a spark from the Shock Flint Trinket." },
+        { id: "joulejunkie", name: "Joule Junkie", desc: "Kill a boss while at 1 HP, using only Sidearms and the Joule Syringe Trinket." }
+      ]
+    },
+    {
+      title: "Weapon & Trinket Tricks",
+      items: [
+        { id: "skippinstone", name: "Skippin' Stone", desc: "Kill an enemy across 8 tiles of water using the Hollower's Rocks." },
+        { id: "fourpointhatchet", name: "Four-Point Hatchet", desc: "Hit 4 enemies, one with each spark of a single Volt Hatchet." },
+        { id: "boomerangblade", name: "Boomerang Blade", desc: "Kill 2 foes with a single Gyro Dagger, changing its direction with each strike." },
+        { id: "wormhole", name: "Wormhole", desc: "Kill an enemy after warping from offscreen with the Recall Disc." },
+        { id: "bashful", name: "Bashful", desc: "Strike 3 enemies with one charge of the Drill Driver." },
+        { id: "lightemup", name: "Light 'em Up", desc: "Avoid a certain fate in the darkness by using the Dynamo Lantern." },
+        { id: "pitfallparasol", name: "Pitfall Parasol", desc: "Knock multiple enemies into a pit using a single Deflector Parasol." },
+        { id: "hauntingreach", name: "Haunting Reach", desc: "Hit a foe from 25 tiles away using the Gnawing Ghosts." },
+        { id: "mistglide", name: "Mist Glide", desc: "Use the Mist Jar to phase through 3 enemies in one use." },
+        { id: "fogburst", name: "Fogburst", desc: "Eliminate 6 enemies using one continuous spray of the Fog Thrower." },
+        { id: "tiptapper", name: "Tip Tapper", desc: "Kill 10 enemies in a row using Nightstar's Dread Mace upgrade, hitting only with the tip." },
+        { id: "perfectguard", name: "Perfect Guard", desc: "Parry 15 consecutive attacks with the Guardian Casket." },
+        { id: "busterbounce", name: "Buster Bounce", desc: "Defeat 3 enemies in a row with only double bank shots using the Battery Buster." },
+        { id: "comboconductor", name: "Combo Conductor", desc: "While in combat, maintain max combo with the Chain Capacitor Trinket for 10 seconds." },
+        { id: "plasmasurvivor", name: "Plasma Survivor", desc: "Fill your reserve tank with the Plasma Jug Trinket while at 1 HP." },
+        { id: "pendulummaster", name: "Pendulum Master", desc: "Parry 10 attacks without getting hit using the Dodging Pendulum Trinket." },
+        { id: "beckoningbuddy", name: "Beckoning Buddy", desc: "Keep the Beckoning Collar creature active for most of a boss fight." }
+      ]
+    },
+    {
+      title: "Traversal & Minigames",
+      items: [
+        { id: "steedhopper", name: "Steed Hopper", desc: "Using the Iron Steed, hop on 3 enemies' heads without touching the ground." },
+        { id: "dragrace", name: "Drag Race", desc: "Ride the Iron Steed across 6 unique screens without doubling back." },
+        { id: "boundingbonanza", name: "Bounding Bonanza", desc: "Kill an enemy with a Bounding Bomb explosion, after both orbs bounce 3 times." },
+        { id: "minigamemaster", type: "group", name: "Minigame Master",
+          desc: "Master all Racing, Ring Dive, and Wrecker challenges.",
+          children: [
+            { id: "mm_racing", name: "Racing" },
+            { id: "mm_ringdive", name: "Ring Dive" },
+            { id: "mm_wrecker", name: "Wrecker" }
+          ]},
+        { id: "traumatized", name: "Traumatized", desc: "Dance with Poppit." },
+        { id: "trashjuggler", name: "Trash Juggler", desc: "Knock the kids' can below the bottom of the bridge." },
+        { id: "opossumimpressem", name: "Opossum Impressem", desc: "Show Lena that you can clear 10 tiles without touching the ground." }
+      ]
+    },
+    {
+      title: "Platinum",
+      items: [
+        { id: "feataccompli", platinum: true, name: "Feat Accompli", desc: "Earn all other Feats." }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

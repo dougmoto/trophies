@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Humanity — Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>Signal Log — Trophy Tracker</div>
+  <h1 id="gameTitle"></h1>
+  <p class="sub" id="gameSub"></p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Progress</span>
+      <span class="panel-count">
+        <span id="doneCount">0</span> / <span id="totalCount">0</span>
+        <em id="pctLabel">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="barFill" style="width:0%"></div></div>
+    <div class="status-line" id="statusLine">Saved to this device automatically.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="backup">
+    <h3>Backup / transfer to another device</h3>
+    <textarea id="codeBox" rows="2" readonly placeholder="Your progress code appears here"></textarea>
+    <div class="backup-actions">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Paste &amp; restore</button>
+    </div>
+    <div class="backup-msg" id="backupMsg"></div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+Tracker.init({
+  key: "humanity",
+  title: "Humanity",
+  subtitle: "46 trophies · PS5 · 1 Platinum, 3 Gold, 7 Silver, 35 Bronze",
+
+  // Earned as of 6 Sep 2026 — 17 confirmed directly from screenshots.
+  earned: [
+    "upupandaway", "goldymine", "prologueinthebooks", "scenicroute",
+    "awakeningputtobed", "choicemade", "blackandblue", "fatesealed",
+    "goldystar_prologue", "goldystar_awakening", "goldystar_choice", "goldystar_fate",
+    "reformer", "nolongerhuman", "trytryagain", "ohthehumanity", "archivedigger"
+  ],
+
+  // The three still-in-progress Goldy Star counters show their exact
+  // targets live in PSNProfiles (0/20, 0/18, 0/23) — seeding those here
+  // so the counters start accurate rather than at zero.
+  counters: { goldystar_competition: 0, goldystar_war: 0, goldystar_dependence: 0, goldystar_civilization: 0 },
+
+  sections: [
+    {
+      title: "Story — Sequences",
+      items: [
+        { id: "prologueinthebooks", name: "PROLOGUE: IN THE BOOKS", desc: "Complete the prologue." },
+        { id: "awakeningputtobed", name: "AWAKENING: PUT TO BED", desc: "Complete Sequence 1: Awakening." },
+        { id: "choicemade", name: "CHOICE: MADE", desc: "Complete Sequence 2: Choice." },
+        { id: "fatesealed", name: "FATE: SEALED", desc: "Complete Sequence 3: Fate." },
+        { id: "competitionbested", name: "COMPETITION: BESTED", desc: "Complete Sequence 4: Competition." },
+        { id: "warwon", name: "WAR: WON", desc: "Complete Sequence 5: War." },
+        { id: "dependencebroken", name: "DEPENDENCE: BROKEN", desc: "Complete Sequence 6: Dependence." },
+        { id: "civilizationconquered", name: "CIVILIZATION: CONQUERED", desc: "Complete Sequence 7: Civilization." }
+      ]
+    },
+    {
+      title: "Core Bosses",
+      items: [
+        { id: "blackandblue", name: "BLACK & BLUE", desc: "Defeat the Blue Core." },
+        { id: "greeneyedmonster", name: "GREEN-EYED MONSTER", desc: "Defeat the Green Core." },
+        { id: "yellowmellowed", name: "YELLOW MELLOWED", desc: "Defeat the Yellow Core." },
+        { id: "redisdead", name: "RED IS DEAD", desc: "Defeat the Red Core." }
+      ]
+    },
+    {
+      title: "Goldy Collection",
+      desc: "One Goldy Star trophy per sequence, plus the two overall pickup trophies. The four still in progress show live counters with their exact totals confirmed from PSNProfiles.",
+      items: [
+        { id: "upupandaway", name: "UP, UP, AND AWAY", desc: "Lead the people into the light." },
+        { id: "goldymine", name: "GOLDY, MINE", desc: "Deliver a Goldy into the light." },
+        { id: "goldystar_prologue", name: "GOLDY STAR: PROLOGUE", desc: "Collect all the Goldy in the Prologue." },
+        { id: "goldystar_awakening", name: "GOLDY STAR: AWAKENING", desc: "Collect all the Goldy in Sequence 1: Awakening." },
+        { id: "goldystar_choice", name: "GOLDY STAR: CHOICE", desc: "Collect all the Goldy in Sequence 2: Choice." },
+        { id: "goldystar_fate", name: "GOLDY STAR: FATE", desc: "Collect all the Goldy in Sequence 3: Fate." },
+        { id: "goldystar_competition", type: "counter", target: 20, step: 1,
+          name: "GOLDY STAR: COMPETITION", desc: "Collect all the Goldy in Sequence 4: Competition." },
+        { id: "goldystar_war", type: "counter", target: 18, step: 1,
+          name: "GOLDY STAR: WAR", desc: "Collect all the Goldy in Sequence 5: War." },
+        { id: "goldystar_dependence", type: "counter", target: 23, step: 1,
+          name: "GOLDY STAR: DEPENDENCE", desc: "Collect all the Goldy in Sequence 6: Dependence." },
+        { id: "goldystar_civilization", type: "counter", target: 23, step: 1,
+          name: "GOLDY STAR: CIVILIZATION", desc: "Collect all the Goldy in Sequence 7: Civilization." },
+        { id: "goldygod", name: "GOLDY GOD", desc: "Collect all the Goldy." }
+      ]
+    },
+    {
+      title: "Commands & Interactions",
+      items: [
+        { id: "scenicroute", name: "SCENIC ROUTE", desc: "Complete an optional trial." },
+        { id: "trytryagain", name: "TRY, TRY AGAIN", desc: "Retry the same trial five times while keeping your placed commands." },
+        { id: "safetyfirst", name: "SAFETY FIRST", desc: "Get squished by a block." },
+        { id: "fireatwill", name: "FIRE AT WILL", desc: "Issue the people with firearms." },
+        { id: "walkingthehuman", name: "WALKING THE HUMAN", desc: "Have a single human follow you using the FOLLOW command." },
+        { id: "followtheleader", name: "FOLLOW THE LEADER", desc: "Have 1,000 humans follow you at once using the FOLLOW command." },
+        { id: "significantothers", name: "SIGNIFICANT OTHERS", desc: "Defeat 100,000 Others." },
+        { id: "leaderofthepack", name: "LEADER OF THE PACK", desc: "Lead 50,000 people into the light." },
+        { id: "ohthehumanity", name: "OH, THE HUMANITY", desc: "Cause 50,000 humans to perish." },
+        { id: "archivedigger", name: "ARCHIVE DIGGER", desc: "Access the Archives." },
+        { id: "playinggod", name: "PLAYING GOD", desc: "Visit the Archives and give the people a new model and skin." },
+        { id: "bythenumbers", name: "BY THE NUMBERS", desc: "View all Stats." }
+      ]
+    },
+    {
+      title: "Reformer Path",
+      items: [
+        { id: "reformer", name: "REFORMER", desc: "Cause the people to take on a new form." },
+        { id: "nolongerhuman", name: "NO LONGER HUMAN?", desc: "Cause the people to take on a truly astonishing form." }
+      ]
+    },
+    {
+      title: "Seven Wonders",
+      desc: "Each Wonder is its own trophy — Wonderdog is a separate one on top that unlocks once all seven are done.",
+      items: [
+        { id: "firstwonder", name: "FIRST WONDER", desc: "Complete Sequence 1: Trial 02-A THREE TOWERS with all Goldy, while using only two switches." },
+        { id: "secondwonder", name: "SECOND WONDER", desc: "Complete Sequence 2: Trial 04-A DROP BOX without a single person perishing." },
+        { id: "thirdwonder", name: "THIRD WONDER", desc: "Complete Sequence 3: Trial 05-A MISSING LINK without using one of the branching commands." },
+        { id: "fourthwonder", name: "FOURTH WONDER", desc: "Complete Sequence 4: Trial 08 THE LAST STRAW without a single person perishing." },
+        { id: "fifthwonder", name: "FIFTH WONDER", desc: "Complete Sequence 5: Trial 04 HILL TO DIE ON after destroying all the Others' gates." },
+        { id: "sixthwonder", name: "SIXTH WONDER", desc: "Lead every single person to the light in Sequence 6: Trial 03-B GRID RUNNER." },
+        { id: "seventhwonder", name: "SEVENTH WONDER", desc: "Complete Sequence 7: Trial 08 CENTRAL PROCESSING without retrying and keeping your placed commands." },
+        { id: "wonderdog", name: "WONDERDOG", desc: "Assemble the Seven Wonders of Humanity.",
+          note: "Unlocks automatically once all seven Wonders above are earned." }
+      ]
+    },
+    {
+      title: "Platinum",
+      items: [
+        { id: "whosagoodboy", platinum: true, name: "WHO'S A GOOD BOY?", desc: "Earn all other trophies." }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>1000xRESIST — Trophy Tracker</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; All games</a>
+  <div class="eyebrow"><span class="dot"></span>Memory Log — Trophy Tracker</div>
+  <h1 id="gameTitle"></h1>
+  <p class="sub" id="gameSub"></p>
+
+  <div class="panel">
+    <div class="panel-top">
+      <span class="panel-label">Progress</span>
+      <span class="panel-count">
+        <span id="doneCount">0</span> / <span id="totalCount">0</span>
+        <em id="pctLabel">(0%)</em>
+      </span>
+    </div>
+    <div class="track"><div class="fill" id="barFill" style="width:0%"></div></div>
+    <div class="status-line" id="statusLine">Saved to this device automatically.</div>
+  </div>
+
+  <div id="sections"></div>
+
+  <div class="backup">
+    <h3>Backup / transfer to another device</h3>
+    <textarea id="codeBox" rows="2" readonly placeholder="Your progress code appears here"></textarea>
+    <div class="backup-actions">
+      <button id="copyBtn">Copy code</button>
+      <button id="loadBtn">Paste &amp; restore</button>
+    </div>
+    <div class="backup-msg" id="backupMsg"></div>
+  </div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+Tracker.init({
+  key: "1000xresist",
+  title: "1000xRESIST",
+  subtitle: "33 trophies · PS5 · 1 Platinum, 4 Gold, 18 Silver, 10 Bronze",
+
+  // Earned as of 27 Aug 2026 — verified against 2 screenshots covering the
+  // full list with no gaps (counted exactly 33 unique trophies).
+  earned: ["ch_redacted", "ch1"],
+
+  sections: [
+    {
+      title: "Story — Chapters",
+      desc: "One per chapter, in order.",
+      items: [
+        { id: "ch_redacted", name: "I want you to see from the beginning", desc: "Complete Chapter [REDACTED]." },
+        { id: "ch1", name: "Her name was Iris", desc: "Complete Chapter 1." },
+        { id: "ch2", name: "I've been thinking about family", desc: "Complete Chapter 2." },
+        { id: "ch3", name: "We were all the new kid once", desc: "Complete Chapter 3." },
+        { id: "ch4", name: "It's a part of growing up", desc: "Complete Chapter 4." },
+        { id: "ch5", name: "I always find you, don't I?", desc: "Complete Chapter 5." },
+        { id: "ch6", name: "I want you to call me Blue", desc: "Complete Chapter 6." },
+        { id: "ch7", name: "噉慢慢爬囉 (Then just slowly crawl)", desc: "Complete Chapter 7." },
+        { id: "ch8", name: "Sometimes you don't fit in the backpack", desc: "Complete Chapter 8." },
+        { id: "ch9", name: "Our own path to blood", desc: "Complete Chapter 9." },
+        { id: "chX", name: "Let this thread be\u2026", desc: "Complete Chapter X." },
+        { id: "complete_game", name: "Hekki Allmo", desc: "Complete The Game.",
+          note: "Only unlocks from the epilogue of Epitaphs (Blue) or Epitaphs (Red) specifically — none of the other five endings count toward it." }
+      ]
+    },
+    {
+      title: "Endings & Finale",
+      desc: "All reachable from one save via chapter select once you've finished the game once — after Chapter X, use chapter select to revisit the final choice and pick different outcomes each time rather than replaying from scratch.",
+      items: [
+        { id: "destroy_gov", name: "Destroy The Provisional Government", desc: "Destroy The Provisional Government." },
+        { id: "end_epitaphs_blue", name: "Ending: Epitaphs (Blue)", desc: "Ending: Epitaphs (Blue)." },
+        { id: "end_epitaphs_red", name: "Ending: Epitaphs (Red)", desc: "Ending: Epitaphs (Red)." },
+        { id: "end_justice_jiao", name: "An Ending: Justice For Jiao", desc: "An Ending: Justice For Jiao." },
+        { id: "end_lights_out", name: "An Ending: Lights Out", desc: "An Ending: Lights Out." },
+        { id: "end_not_mauve", name: "An Ending: Her Name Is Not Mauve", desc: "An Ending: Her Name Is Not Mauve." },
+        { id: "end_the_law", name: "An Ending: The Law", desc: "An Ending: The Law." },
+        { id: "end_scorched_earth", name: "An Ending: Scorched Earth", desc: "An Ending: Scorched Earth." }
+      ]
+    },
+    {
+      title: "Orchard Exploration",
+      items: [
+        { id: "orchard_green_heaven", name: "In the ground", desc: "Find \"Green Heaven\" in the Orchard." },
+        { id: "orchard_horse", name: "How does it make you feel?", desc: "Find the horse statue in the Orchard." },
+        { id: "orchard_pillar", name: "A prayer room", desc: "Find the pillar room in the Orchard." },
+        { id: "orchard_skull", name: "I think it's a fox", desc: "Find the skull shrine in the Orchard." },
+        { id: "orchard_mirror", name: "Do some self-reflection", desc: "Find the mirror shrine in the Orchard." }
+      ]
+    },
+    {
+      title: "Social — Talk to Everyone",
+      items: [
+        { id: "talk_highschool_ch1", name: "Saying your goodbyes", desc: "Talk to all characters in the High School in Chapter 1." },
+        { id: "talk_orchard_ch2", name: "Perform your function, Watcher", desc: "Talk to all characters in the Orchard in Chapter 2." },
+        { id: "talk_orchard_ch3", name: "Happy Birthday!", desc: "Talk to all characters in the Orchard in Chapter 3." },
+        { id: "talk_orchard_ch4", name: "You're a Big Sister, now", desc: "Talk to all characters in the Orchard in Chapter 4." },
+        { id: "talk_oldtown_ch6p1", name: "A clone about town", desc: "Talk to all characters in Old Town in Chapter 6 Part 1." },
+        { id: "talk_oldtown_ch6p3", name: "Somebody has to tend bar", desc: "Talk to all characters in Old Town and the Orchard in Chapter 6 Part 3." },
+        { id: "talk_recordings_ch9", name: "Pacific 50 Descend", desc: "Talk to all recordings of members of The 50 in Chapter 9." }
+      ]
+    },
+    {
+      title: "Platinum",
+      items: [
+        { id: "hekkigrace", platinum: true, name: "Hekki Grace", desc: "The surface awaits\u2026" }
+      ]
+    }
+  ]
+});
+</script>
+</body>
+</html>
